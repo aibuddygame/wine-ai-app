@@ -1,6 +1,5 @@
 import 'wine_model.dart';
 
-/// Search History Data Model
 class SearchHistory {
   final String? id;
   final String? userId;
@@ -10,9 +9,9 @@ class SearchHistory {
   final String? cuisineContext;
   final int? budgetContext;
   final DateTime scannedAt;
-  final double? faceEarned; // Calculated score based on wine prestige
+  final double? faceEarned;
 
-  SearchHistory({
+  const SearchHistory({
     this.id,
     this.userId,
     required this.wineId,
@@ -28,53 +27,50 @@ class SearchHistory {
     return SearchHistory(
       id: json['id']?.toString(),
       userId: json['user_id']?.toString(),
-      wineId: json['wine_id']?.toString() ?? '',
-      wineFingerprint: json['wine_fingerprint'] ?? '',
-      wineName: json['wine_name'],
-      cuisineContext: json['cuisine_context'],
-      budgetContext: json['budget_context'],
+      wineId: (json['wine_id']?.toString()) ?? '',
+      wineFingerprint: (json['wine_fingerprint'] as String?) ?? '',
+      wineName: json['wine_name'] as String?,
+      cuisineContext: json['cuisine_context'] as String?,
+      budgetContext: (json['budget_context'] as num?)?.toInt(),
       scannedAt: json['scanned_at'] != null
-          ? DateTime.parse(json['scanned_at'])
+          ? DateTime.tryParse(json['scanned_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      faceEarned: json['face_earned']?.toDouble(),
+      faceEarned: (json['face_earned'] as num?)?.toDouble(),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'wine_id': wineId,
-      'wine_fingerprint': wineFingerprint,
-      'wine_name': wineName,
-      'cuisine_context': cuisineContext,
-      'budget_context': budgetContext,
-      'scanned_at': scannedAt.toIso8601String(),
-      'face_earned': faceEarned,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        if (id != null) 'id': id,
+        if (userId != null) 'user_id': userId,
+        'wine_id': wineId,
+        'wine_fingerprint': wineFingerprint,
+        if (wineName != null) 'wine_name': wineName,
+        if (cuisineContext != null) 'cuisine_context': cuisineContext,
+        if (budgetContext != null) 'budget_context': budgetContext,
+        'scanned_at': scannedAt.toIso8601String(),
+        if (faceEarned != null) 'face_earned': faceEarned,
+      };
 
-  /// Calculate face earned based on wine benchmarks
   static double calculateFaceEarned(Wine wine) {
     double face = 0;
-    
-    // Base from global ranking
+
+    // Base from global ranking (higher = rarer = more face)
     face += (100 - wine.benchmarks.globalTopPercent) * 0.5;
-    
+
     // Bonus for high-end wines
     if (wine.benchmarks.averagePrice > 1000) face += 20;
     if (wine.benchmarks.averagePrice > 5000) face += 30;
-    
+
     // Critic score bonus
-    if (wine.benchmarks.criticScore != null) {
-      face += (wine.benchmarks.criticScore! - 85).clamp(0, 15);
+    final score = wine.benchmarks.criticScore;
+    if (score != null && score > 85) {
+      face += (score - 85).clamp(0, 15);
     }
-    
+
     return face.clamp(5, 100);
   }
 }
 
-/// Vault Statistics Model
 class VaultStats {
   final int totalScans;
   final double totalFaceEarned;
@@ -83,7 +79,7 @@ class VaultStats {
   final String topConsumptionTier;
   final List<SearchHistory> recentScans;
 
-  VaultStats({
+  const VaultStats({
     required this.totalScans,
     required this.totalFaceEarned,
     required this.totalScannedValue,
@@ -92,14 +88,12 @@ class VaultStats {
     required this.recentScans,
   });
 
-  factory VaultStats.empty() {
-    return VaultStats(
-      totalScans: 0,
-      totalFaceEarned: 0,
-      totalScannedValue: 0,
-      mostScannedCuisine: '-',
-      topConsumptionTier: 'Explorer',
-      recentScans: [],
-    );
-  }
+  factory VaultStats.empty() => const VaultStats(
+        totalScans: 0,
+        totalFaceEarned: 0,
+        totalScannedValue: 0,
+        mostScannedCuisine: '-',
+        topConsumptionTier: 'Explorer',
+        recentScans: [],
+      );
 }

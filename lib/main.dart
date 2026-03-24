@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'providers/user_provider.dart';
@@ -9,8 +11,22 @@ import 'features/context/context_screen.dart';
 import 'features/scanner/scanner_screen.dart';
 import 'features/vault/vault_screen.dart';
 
-void main() {
+// Web database factory
+import 'db_factory.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize web database factory
+  await initDatabaseFactory();
+
+  // Load .env (gracefully handle missing file)
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    debugPrint('No .env file found, using dart-define for API key');
+  }
+
   runApp(const WineAIApp());
 }
 
@@ -19,8 +35,9 @@ class WineAIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Note: In production, load API key from environment
-    const apiKey = String.fromEnvironment('KIMI_API_KEY', defaultValue: '');
+    // API key from .env or --dart-define
+    final apiKey = dotenv.env['KIMI_API_KEY'] ??
+        const String.fromEnvironment('KIMI_API_KEY', defaultValue: '');
 
     return MultiProvider(
       providers: [
@@ -38,7 +55,6 @@ class WineAIApp extends StatelessWidget {
   }
 }
 
-/// Main Navigation with 3-tab bottom navbar
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -49,24 +65,28 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    ContextScreen(),
-    ScannerScreen(),
-    VaultScreen(),
-  ];
+  void _navigateToScan() {
+    setState(() => _currentIndex = 1);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screens = <Widget>[
+      const ContextScreen(),
+      const ScannerScreen(),
+      VaultScreen(onNavigateToScan: _navigateToScan),
+    ];
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppTheme.surface,
-          border: const Border(
+          border: Border(
             top: BorderSide(color: AppTheme.border, width: 1),
           ),
         ),
@@ -104,7 +124,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     required int index,
   }) {
     final isActive = _currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       child: Container(
@@ -134,9 +154,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildScanButton() {
     final isActive = _currentIndex == 1;
-    
+
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = 1),
+      onTap: _navigateToScan,
       child: Container(
         width: 64,
         height: 64,
@@ -144,7 +164,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: isActive 
+            colors: isActive
                 ? [AppTheme.accent, AppTheme.accentLight]
                 : [AppTheme.surfaceLight, AppTheme.surfaceLighter],
           ),
@@ -152,7 +172,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: AppTheme.accent.withOpacity(0.4),
+                    color: AppTheme.accent.withAlpha(102),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),

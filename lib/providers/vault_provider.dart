@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../data/models/search_history_model.dart';
 import '../data/repositories/database_helper.dart';
 
-/// Vault Statistics Provider
 class VaultProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper();
 
@@ -25,7 +24,6 @@ class VaultProvider extends ChangeNotifier {
     loadStats();
   }
 
-  /// Load vault statistics
   Future<void> loadStats() async {
     _isLoading = true;
     notifyListeners();
@@ -34,19 +32,18 @@ class VaultProvider extends ChangeNotifier {
       _stats = await _db.getVaultStats();
       _error = null;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Failed to load vault data';
+      debugPrint('VaultProvider.loadStats error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Refresh stats
   Future<void> refresh() async {
     await loadStats();
   }
 
-  /// Clear error
   void clearError() {
     _error = null;
     notifyListeners();

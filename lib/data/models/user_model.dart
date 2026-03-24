@@ -1,4 +1,3 @@
-/// User Data Model
 class User {
   final String? id;
   final String occupation;
@@ -7,7 +6,7 @@ class User {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  User({
+  const User({
     this.id,
     required this.occupation,
     required this.typicalBudget,
@@ -19,30 +18,27 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id']?.toString(),
-      occupation: json['occupation'] ?? '',
-      typicalBudget: json['typical_budget'] ?? 500,
-      consumptionTier: json['consumption_tier'] ?? 'Explorer',
+      occupation: (json['occupation'] as String?) ?? '',
+      typicalBudget: (json['typical_budget'] as num?)?.toInt() ?? 500,
+      consumptionTier: (json['consumption_tier'] as String?) ?? 'Explorer',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
+          ? DateTime.tryParse(json['updated_at'].toString())
           : null,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'occupation': occupation,
-      'typical_budget': typicalBudget,
-      'consumption_tier': consumptionTier,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        if (id != null) 'id': id,
+        'occupation': occupation,
+        'typical_budget': typicalBudget,
+        'consumption_tier': consumptionTier,
+        if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+        if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
+      };
 
-  /// Calculate consumption tier based on typical budget
   static String calculateTier(int budget) {
     if (budget < 300) return 'Casual';
     if (budget < 800) return 'Explorer';

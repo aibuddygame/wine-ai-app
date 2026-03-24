@@ -2,7 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-/// Bento Grid Card - Base component for Cal AI aesthetic
+// ==================== BENTO CARD ====================
+
 class BentoCard extends StatelessWidget {
   final Widget child;
   final Color? backgroundColor;
@@ -10,7 +11,6 @@ class BentoCard extends StatelessWidget {
   final double? height;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
-  final Border? border;
 
   const BentoCard({
     super.key,
@@ -20,29 +20,31 @@ class BentoCard extends StatelessWidget {
     this.height,
     this.padding = const EdgeInsets.all(AppTheme.spacingMd),
     this.onTap,
-    this.border,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: width,
-        height: height,
-        padding: padding,
-        decoration: BoxDecoration(
-          color: backgroundColor ?? AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-          border: border ?? Border.all(color: AppTheme.border, width: 1),
-        ),
-        child: child,
+    final card = Container(
+      width: width,
+      height: height,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? AppTheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        border: Border.all(color: AppTheme.border, width: 1),
       ),
+      child: child,
     );
+
+    if (onTap != null) {
+      return GestureDetector(onTap: onTap, child: card);
+    }
+    return card;
   }
 }
 
-/// Bento Grid Layout
+// ==================== BENTO GRID ====================
+
 class BentoGrid extends StatelessWidget {
   final List<Widget> children;
   final int crossAxisCount;
@@ -71,7 +73,8 @@ class BentoGrid extends StatelessWidget {
   }
 }
 
-/// Data Bubble - Floating animated bubble for loading states
+// ==================== DATA BUBBLE ====================
+
 class DataBubble extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -88,30 +91,24 @@ class DataBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = color ?? AppTheme.accent;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: (color ?? AppTheme.accent).withOpacity(0.15),
+        color: c.withAlpha(38),
         shape: BoxShape.circle,
-        border: Border.all(
-          color: (color ?? AppTheme.accent).withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: c.withAlpha(77), width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: color ?? AppTheme.accent,
-            size: size * 0.3,
-          ),
+          Icon(icon, color: c, size: size * 0.3),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: color ?? AppTheme.accent,
+              color: c,
               fontSize: size * 0.12,
               fontWeight: FontWeight.w500,
             ),
@@ -123,7 +120,15 @@ class DataBubble extends StatelessWidget {
   }
 }
 
-/// Animated Data Bubbles for analysis loading state
+// ==================== ANIMATED DATA BUBBLES ====================
+
+class _BubbleConfig {
+  final String label;
+  final IconData icon;
+  final Color color;
+  const _BubbleConfig(this.label, this.icon, this.color);
+}
+
 class DataBubblesAnimation extends StatefulWidget {
   const DataBubblesAnimation({super.key});
 
@@ -133,51 +138,45 @@ class DataBubblesAnimation extends StatefulWidget {
 
 class _DataBubblesAnimationState extends State<DataBubblesAnimation>
     with TickerProviderStateMixin {
+  static const _bubbles = [
+    _BubbleConfig('Identity', Icons.wine_bar, AppTheme.wineRed),
+    _BubbleConfig('Taste', Icons.trending_up, AppTheme.accent),
+    _BubbleConfig('Rankings', Icons.emoji_events, AppTheme.wineGold),
+    _BubbleConfig('Scripts', Icons.chat_bubble, AppTheme.success),
+  ];
+
   late final List<AnimationController> _controllers;
   late final List<Animation<double>> _animations;
-
-  final List<_BubbleData> _bubbles = [
-    _BubbleData('Identity', Icons.wine_bar, AppTheme.wineRed, 0),
-    _BubbleData('Taste', Icons.trending_up, AppTheme.accent, 1),
-    _BubbleData('Rankings', Icons.emoji_events, AppTheme.wineGold, 2),
-    _BubbleData('Scripts', Icons.chat_bubble, AppTheme.success, 3),
-  ];
 
   @override
   void initState() {
     super.initState();
-    
+
     _controllers = List.generate(
       _bubbles.length,
-      (index) => AnimationController(
+      (i) => AnimationController(
         duration: const Duration(milliseconds: 1500),
         vsync: this,
       ),
     );
 
-    _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeInOut,
-        ),
-      );
-    }).toList();
+    _animations = _controllers
+        .map((c) => Tween<double>(begin: 0, end: 1).animate(
+              CurvedAnimation(parent: c, curve: Curves.easeInOut),
+            ))
+        .toList();
 
-    // Start animations with stagger
     for (var i = 0; i < _controllers.length; i++) {
       Future.delayed(Duration(milliseconds: i * 200), () {
-        if (mounted) {
-          _controllers[i].repeat(reverse: true);
-        }
+        if (mounted) _controllers[i].repeat(reverse: true);
       });
     }
   }
 
   @override
   void dispose() {
-    for (final controller in _controllers) {
-      controller.dispose();
+    for (final c in _controllers) {
+      c.dispose();
     }
     super.dispose();
   }
@@ -188,26 +187,24 @@ class _DataBubblesAnimationState extends State<DataBubblesAnimation>
       height: 200,
       child: Stack(
         alignment: Alignment.center,
-        children: _bubbles.asMap().entries.map((entry) {
-          final index = entry.key;
-          final bubble = entry.value;
-          
-          // Position bubbles in a circle
-          final angle = (index / _bubbles.length) * 2 * 3.14159;
-          final radius = 60.0;
-          
+        children: List.generate(_bubbles.length, (i) {
+          final bubble = _bubbles[i];
+          final angle = (i / _bubbles.length) * 2 * pi;
+          const radius = 60.0;
+
           return AnimatedBuilder(
-            animation: _animations[index],
-            builder: (context, child) {
+            animation: _animations[i],
+            builder: (context, _) {
+              final scale = 0.8 + 0.2 * _animations[i].value;
               final offset = Offset(
-                radius * 0.8 * cos(angle) * (0.8 + 0.2 * _animations[index].value),
-                radius * 0.6 * sin(angle) * (0.8 + 0.2 * _animations[index].value),
+                radius * 0.8 * cos(angle) * scale,
+                radius * 0.6 * sin(angle) * scale,
               );
-              
+
               return Transform.translate(
                 offset: offset,
                 child: Opacity(
-                  opacity: 0.6 + 0.4 * _animations[index].value,
+                  opacity: 0.6 + 0.4 * _animations[i].value,
                   child: DataBubble(
                     label: bubble.label,
                     icon: bubble.icon,
@@ -218,22 +215,14 @@ class _DataBubblesAnimationState extends State<DataBubblesAnimation>
               );
             },
           );
-        }).toList(),
+        }),
       ),
     );
   }
 }
 
-class _BubbleData {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final int index;
+// ==================== TASTE SLIDER ====================
 
-  _BubbleData(this.label, this.icon, this.color, this.index);
-}
-
-/// Taste Profile Slider Widget
 class TasteSlider extends StatelessWidget {
   final String label;
   final int value;
@@ -252,6 +241,7 @@ class TasteSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = color ?? AppTheme.accent;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -269,7 +259,7 @@ class TasteSlider extends StatelessWidget {
             Text(
               '$value%',
               style: TextStyle(
-                color: color ?? AppTheme.accent,
+                color: c,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -282,7 +272,7 @@ class TasteSlider extends StatelessWidget {
           child: LinearProgressIndicator(
             value: value / 100,
             backgroundColor: AppTheme.surfaceLight,
-            valueColor: AlwaysStoppedAnimation<Color>(color ?? AppTheme.accent),
+            valueColor: AlwaysStoppedAnimation<Color>(c),
             minHeight: 8,
           ),
         ),
@@ -311,7 +301,8 @@ class TasteSlider extends StatelessWidget {
   }
 }
 
-/// Percentage Badge
+// ==================== PERCENT BADGE ====================
+
 class PercentBadge extends StatelessWidget {
   final int percent;
   final String label;
@@ -326,21 +317,21 @@ class PercentBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badgeColor = color ?? AppTheme.accent;
-    
+    final c = color ?? AppTheme.accent;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.1),
+        color: c.withAlpha(26),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: badgeColor.withOpacity(0.3)),
+        border: Border.all(color: c.withAlpha(77)),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             '$percent%',
             style: TextStyle(
-              color: badgeColor,
+              color: c,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -359,7 +350,8 @@ class PercentBadge extends StatelessWidget {
   }
 }
 
-/// Cuisine Chip Selector
+// ==================== CUISINE CHIP ====================
+
 class CuisineChip extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -380,7 +372,8 @@ class CuisineChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accent.withOpacity(0.2) : AppTheme.surfaceLight,
+          color:
+              isSelected ? AppTheme.accent.withAlpha(51) : AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
           border: Border.all(
             color: isSelected ? AppTheme.accent : AppTheme.border,
@@ -400,7 +393,8 @@ class CuisineChip extends StatelessWidget {
   }
 }
 
-/// Stat Card for Vault
+// ==================== STAT CARD ====================
+
 class StatCard extends StatelessWidget {
   final String value;
   final String label;
@@ -421,11 +415,7 @@ class StatCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: color ?? AppTheme.accent,
-            size: 28,
-          ),
+          Icon(icon, color: color ?? AppTheme.accent, size: 28),
           const SizedBox(height: 12),
           Text(
             value,
@@ -446,6 +436,61 @@ class StatCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ==================== LOADING SKELETON ====================
+
+class SkeletonCard extends StatefulWidget {
+  final double? width;
+  final double height;
+
+  const SkeletonCard({super.key, this.width, this.height = 120});
+
+  @override
+  State<SkeletonCard> createState() => _SkeletonCardState();
+}
+
+class _SkeletonCardState extends State<SkeletonCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.3, end: 0.6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) {
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceLight.withAlpha(
+              (_animation.value * 255).toInt(),
+            ),
+            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          ),
+        );
+      },
     );
   }
 }

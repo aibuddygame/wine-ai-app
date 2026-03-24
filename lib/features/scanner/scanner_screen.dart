@@ -9,7 +9,6 @@ import '../../providers/user_provider.dart';
 import '../../ui/components/bento_components.dart';
 import '../results/results_screen.dart';
 
-/// Scanner Tab - Camera/Image capture screen
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
 
@@ -22,37 +21,36 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   Future<void> _captureImage() async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(
+      final pickedFile = await _picker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
+        maxWidth: AppConstants.maxImageWidth,
+        maxHeight: AppConstants.maxImageHeight,
+        imageQuality: AppConstants.imageQuality,
       );
-
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
         _analyzeImage(bytes);
       }
-    } catch (e) {
-      // Fallback to gallery on web or if camera fails
+    } catch (_) {
+      // Camera not available (common on web), fall back to gallery
       _pickFromGallery();
     }
   }
 
   Future<void> _pickFromGallery() async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(
+      final pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
+        maxWidth: AppConstants.maxImageWidth,
+        maxHeight: AppConstants.maxImageHeight,
+        imageQuality: AppConstants.imageQuality,
       );
-
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
         _analyzeImage(bytes);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error selecting image: $e'),
@@ -66,23 +64,18 @@ class _ScannerScreenState extends State<ScannerScreen> {
     final userProvider = context.read<UserProvider>();
     final wineProvider = context.read<WineProvider>();
 
-    final occupation = userProvider.user?.occupation;
-    final budget = userProvider.user?.typicalBudget;
-
     await wineProvider.analyzeWine(
       imageBytes,
-      occupation: occupation,
-      budget: budget,
+      occupation: userProvider.user?.occupation,
+      budget: userProvider.user?.typicalBudget,
     );
 
+    if (!mounted) return;
+
     if (wineProvider.error == null && wineProvider.currentWine != null) {
-      if (mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const ResultsScreen(),
-          ),
-        );
-      }
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ResultsScreen()),
+      );
     }
   }
 
@@ -92,12 +85,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Consumer<WineProvider>(
-          builder: (context, wineProvider, child) {
-            if (wineProvider.isAnalyzing) {
-              return _buildAnalyzingState();
-            }
-
-            return _buildScannerUI();
+          builder: (context, wineProvider, _) {
+            if (wineProvider.isAnalyzing) return _buildAnalyzingState();
+            return _buildScannerUI(wineProvider);
           },
         ),
       ),
@@ -125,13 +115,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  Widget _buildScannerUI() {
+  Widget _buildScannerUI(WineProvider wineProvider) {
     return Padding(
       padding: const EdgeInsets.all(AppTheme.spacingLg),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Header
           Text(
             AppConstants.scannerTitle,
             style: Theme.of(context).textTheme.displaySmall,
@@ -145,7 +134,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
           ),
           const SizedBox(height: AppTheme.spacingXxl),
 
-          // Scanner Visual
+          // Scanner Visual Frame
           Container(
             width: 280,
             height: 280,
@@ -158,44 +147,22 @@ class _ScannerScreenState extends State<ScannerScreen> {
               alignment: Alignment.center,
               children: [
                 // Corner markers
-                Positioned(
-                  top: 20,
-                  left: 20,
-                  child: _buildCornerMarker(),
-                ),
-                Positioned(
-                  top: 20,
-                  right: 20,
-                  child: _buildCornerMarker(rotate: 90),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  child: _buildCornerMarker(rotate: 270),
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: _buildCornerMarker(rotate: 180),
-                ),
-
-                // Center icon
+                ..._buildCornerMarkers(),
+                // Center content
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.document_scanner_outlined,
                       size: 64,
-                      color: AppTheme.accent.withOpacity(0.5),
+                      color: AppTheme.accent.withAlpha(128),
                     ),
                     const SizedBox(height: AppTheme.spacingMd),
                     const Text(
                       'Position wine label\nwithin frame',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppTheme.textTertiary,
-                        fontSize: 14,
-                      ),
+                      style:
+                          TextStyle(color: AppTheme.textTertiary, fontSize: 14),
                     ),
                   ],
                 ),
@@ -203,6 +170,31 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
           ),
           const SizedBox(height: AppTheme.spacingXxl),
+
+          // API key warning
+          if (!wineProvider.hasApiKey) ...[
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingMd),
+              margin: const EdgeInsets.only(bottom: AppTheme.spacingLg),
+              decoration: BoxDecoration(
+                color: AppTheme.warning.withAlpha(26),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                border: Border.all(color: AppTheme.warning.withAlpha(77)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.warning_amber, color: AppTheme.warning, size: 20),
+                  SizedBox(width: AppTheme.spacingSm),
+                  Expanded(
+                    child: Text(
+                      'API key not configured. Set KIMI_API_KEY to enable scanning.',
+                      style: TextStyle(color: AppTheme.warning, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Capture Button
           SizedBox(
@@ -212,13 +204,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
               onPressed: _captureImage,
               icon: const Icon(Icons.camera_alt),
               label: const Text('Capture'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accent,
-                foregroundColor: AppTheme.textPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                ),
-              ),
             ),
           ),
           const SizedBox(height: AppTheme.spacingMd),
@@ -234,14 +219,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
           ),
 
           // Error display
-          if (context.watch<WineProvider>().error != null) ...[
+          if (wineProvider.error != null) ...[
             const SizedBox(height: AppTheme.spacingLg),
             Container(
               padding: const EdgeInsets.all(AppTheme.spacingMd),
               decoration: BoxDecoration(
-                color: AppTheme.error.withOpacity(0.1),
+                color: AppTheme.error.withAlpha(26),
                 borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                border: Border.all(color: AppTheme.error.withOpacity(0.3)),
+                border: Border.all(color: AppTheme.error.withAlpha(77)),
               ),
               child: Row(
                 children: [
@@ -249,13 +234,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   const SizedBox(width: AppTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      context.watch<WineProvider>().error!,
-                      style: const TextStyle(color: AppTheme.error, fontSize: 12),
+                      wineProvider.error!,
+                      style: const TextStyle(
+                          color: AppTheme.error, fontSize: 12),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 16, color: AppTheme.error),
-                    onPressed: () => context.read<WineProvider>().clearError(),
+                    icon: const Icon(Icons.close,
+                        size: 16, color: AppTheme.error),
+                    onPressed: () => wineProvider.clearError(),
                   ),
                 ],
               ),
@@ -266,19 +253,34 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  Widget _buildCornerMarker({int rotate = 0}) {
-    return Transform.rotate(
-      angle: rotate * 3.14159 / 180,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppTheme.accent, width: 3),
-            left: BorderSide(color: AppTheme.accent, width: 3),
+  List<Widget> _buildCornerMarkers() {
+    const positions = [
+      {'top': 20.0, 'left': 20.0, 'angle': 0.0},
+      {'top': 20.0, 'right': 20.0, 'angle': 90.0},
+      {'bottom': 20.0, 'right': 20.0, 'angle': 180.0},
+      {'bottom': 20.0, 'left': 20.0, 'angle': 270.0},
+    ];
+
+    return positions.map((pos) {
+      return Positioned(
+        top: pos['top'],
+        left: pos['left'],
+        right: pos['right'],
+        bottom: pos['bottom'],
+        child: Transform.rotate(
+          angle: (pos['angle']!) * 3.14159265 / 180,
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: AppTheme.accent, width: 3),
+                left: BorderSide(color: AppTheme.accent, width: 3),
+              ),
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }).toList();
   }
 }

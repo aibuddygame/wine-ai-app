@@ -1,11 +1,10 @@
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../data/models/wine_model.dart';
 import '../data/models/search_history_model.dart';
 import '../data/repositories/database_helper.dart';
 import '../data/services/kimi_service.dart';
 
-/// Wine Analysis Provider
 class WineProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper();
   final KimiService _kimiService;
@@ -21,18 +20,19 @@ class WineProvider extends ChangeNotifier {
   bool get isAnalyzing => _isAnalyzing;
   String? get error => _error;
   String get selectedCuisine => _selectedCuisine;
-  DynamicPairing? get currentPairing => 
+  bool get hasApiKey => _kimiService.hasApiKey;
+
+  DynamicPairing? get currentPairing =>
       _currentWine?.pairings[_selectedCuisine];
 
-  WineProvider({required String apiKey}) : _kimiService = KimiService(apiKey: apiKey);
+  WineProvider({required String apiKey})
+      : _kimiService = KimiService(apiKey: apiKey);
 
-  /// Set selected cuisine
   void setCuisine(String cuisine) {
     _selectedCuisine = cuisine;
     notifyListeners();
   }
 
-  /// Analyze wine image
   Future<void> analyzeWine(
     Uint8List imageBytes, {
     String? occupation,
@@ -44,10 +44,6 @@ class WineProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // First check cache
-      // Note: In a real implementation, we'd generate a fingerprint from the image
-      // For now, we'll always call the API
-      
       final wine = await _kimiService.analyzeWineImage(
         imageBytes,
         occupation: occupation,
@@ -57,55 +53,62 @@ class WineProvider extends ChangeNotifier {
 
       // Save to database
       final wineId = await _db.insertWine(wine);
-      
-      // Create search history
+
+      // Create search history entry
       final faceEarned = SearchHistory.calculateFaceEarned(wine);
       final history = SearchHistory(
         wineId: wineId.toString(),
         wineFingerprint: wine.fingerprint,
         wineName: wine.identity.fullName,
-        cuisineContext: cuisine,
+        cuisineContext: cuisine ?? _selectedCuisine,
         budgetContext: budget,
         scannedAt: DateTime.now(),
         faceEarned: faceEarned,
       );
-      
       await _db.insertSearchHistory(history);
 
       _currentWine = wine;
       await _loadWineHistory();
+    } on KimiServiceException catch (e) {
+      _error = e.message;
+      debugPrint('WineProvider.analyzeWine KimiError: $e');
     } catch (e) {
-      _error = e.toString();
+      _error = 'Failed to analyze wine. Please try again.';
+      debugPrint('WineProvider.analyzeWine error: $e');
     } finally {
       _isAnalyzing = false;
       notifyListeners();
     }
   }
 
-  /// Check cache for wine
   Future<Wine?> checkCache(String fingerprint) async {
-    return await _db.getWineByFingerprint(fingerprint);
+    try {
+      return await _db.getWineByFingerprint(fingerprint);
+    } catch (e) {
+      debugPrint('WineProvider.checkCache error: $e');
+      return null;
+    }
   }
 
-  /// Load wine history
   Future<void> _loadWineHistory() async {
-    _wineHistory = await _db.getAllWines();
+    try {
+      _wineHistory = await _db.getAllWines();
+    } catch (e) {
+      debugPrint('WineProvider._loadWineHistory error: $e');
+    }
     notifyListeners();
   }
 
-  /// Clear current wine
-  void clearCurrentWine() {
-    _currentWine = null;
-    notifyListeners();
-  }
-
-  /// Set current wine from history
   void setCurrentWine(Wine wine) {
     _currentWine = wine;
     notifyListeners();
   }
 
-  /// Clear error
+  void clearCurrentWine() {
+    _currentWine = null;
+    notifyListeners();
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

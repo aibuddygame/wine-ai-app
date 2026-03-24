@@ -1,92 +1,157 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
 import '../models/wine_model.dart';
 import '../../core/constants/app_constants.dart';
 
-/// Kimi LLM Service for Wine Vision Analysis
+class KimiServiceException implements Exception {
+  final String message;
+  final int? statusCode;
+  const KimiServiceException(this.message, {this.statusCode});
+
+  @override
+  String toString() => 'KimiServiceException: $message';
+}
+
 class KimiService {
   final String apiKey;
   final String apiUrl;
   final String model;
+  final http.Client _client;
 
   KimiService({
     required this.apiKey,
     this.apiUrl = AppConstants.kimiApiUrl,
     this.model = AppConstants.kimiModel,
-  });
+    http.Client? client,
+  }) : _client = client ?? http.Client();
 
-  /// Analyze wine image and return structured data
+  bool get hasApiKey => apiKey.isNotEmpty;
+
   Future<Wine> analyzeWineImage(
     Uint8List imageBytes, {
     String? occupation,
     int? budget,
     String? cuisine,
   }) async {
+    if (!hasApiKey) {
+      throw const KimiServiceException(
+        'API key not configured. Set KIMI_API_KEY in your .env file.',
+      );
+    }
+
     final base64Image = base64Encode(imageBytes);
-    
     final prompt = _buildPrompt(
       occupation: occupation,
       budget: budget,
       cuisine: cuisine,
     );
 
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': model,
-        'messages': [
-          {
-            'role': 'system',
-            'content': 'You are a Senior Sommelier and Wine Data Analyst. Your task is to analyze wine images and provide structured data for a wine app. Always respond with valid JSON only.',
-          },
-          {
-            'role': 'user',
-            'content': [
-              {
-                'type': 'text',
-                'text': prompt,
-              },
-              {
-                'type': 'image_url',
-                'image_url': {
-                  'url': 'data:image/jpeg;base64,$base64Image',
-                },
-              },
-            ],
-          },
-        ],
-        'temperature': 0.3,
-        'max_tokens': 2000,
-      }),
-    );
+    // Retry logic
+    Exception? lastError;
+    for (var attempt = 0; attempt <= AppConstants.maxRetries; attempt++) {
+      try {
+        return await _makeRequest(base64Image, prompt);
+      } on KimiServiceException {
+        rethrow;
+      } on TimeoutException {
+        lastError = const KimiServiceException('Request timed out. Please try again.');
+      } on FormatException catch (e) {
+        lastError = KimiServiceException('Failed to parse response: ${e.message}');
+        break; // Don't retry parse errors
+      } catch (e) {
+        lastError = KimiServiceException('Network error: $e');
+      }
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final content = data['choices'][0]['message']['content'];
-      
-      // Parse JSON from content (handle potential markdown code blocks)
-      final jsonString = _extractJson(content);
-      final wineData = jsonDecode(jsonString);
-      
-      // Generate fingerprint and create Wine object
-      final identity = WineIdentity.fromJson(wineData['wine_identity'] ?? {});
-      final fingerprint = Wine.generateFingerprint(identity);
-      
-      return Wine.fromJson({
-        ...wineData,
-        'fingerprint': fingerprint,
-      });
-    } else {
-      throw Exception('Kimi API Error: ${response.statusCode} - ${response.body}');
+      if (attempt < AppConstants.maxRetries) {
+        await Future.delayed(Duration(seconds: attempt + 1));
+      }
     }
+
+    throw lastError ?? const KimiServiceException('Unknown error');
   }
 
-  /// Build the analysis prompt with context
+  Future<Wine> _makeRequest(String base64Image, String prompt) async {
+    final response = await _client
+        .post(
+          Uri.parse(apiUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode({
+            'model': model,
+            'messages': [
+              {
+                'role': 'system',
+                'content':
+                    'You are a Senior Sommelier and Wine Data Analyst. '
+                    'Analyze wine images and provide structured data. '
+                    'Always respond with valid JSON only. No markdown, no prose.',
+              },
+              {
+                'role': 'user',
+                'content': [
+                  {'type': 'text', 'text': prompt},
+                  {
+                    'type': 'image_url',
+                    'image_url': {
+                      'url': 'data:image/jpeg;base64,$base64Image',
+                    },
+                  },
+                ],
+              },
+            ],
+            'temperature': 0.3,
+            'max_tokens': 2000,
+          }),
+        )
+        .timeout(AppConstants.apiTimeout);
+
+    if (response.statusCode != 200) {
+      final body = response.body;
+      String detail = 'Status ${response.statusCode}';
+      try {
+        final err = jsonDecode(body) as Map<String, dynamic>;
+        detail = (err['error']?['message'] as String?) ?? detail;
+      } catch (_) {}
+      throw KimiServiceException(detail, statusCode: response.statusCode);
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final choices = data['choices'] as List<dynamic>?;
+    if (choices == null || choices.isEmpty) {
+      throw const KimiServiceException('Empty response from API');
+    }
+
+    final content =
+        (choices[0] as Map<String, dynamic>)['message']['content'] as String;
+    final jsonString = _extractJson(content);
+
+    final Map<String, dynamic> wineData;
+    try {
+      wineData = jsonDecode(jsonString) as Map<String, dynamic>;
+    } on FormatException {
+      debugPrint('Failed to parse LLM response: $jsonString');
+      throw const KimiServiceException(
+        'AI returned invalid data. Please try again with a clearer image.',
+      );
+    }
+
+    final identity =
+        WineIdentity.fromJson(wineData['wine_identity'] as Map<String, dynamic>? ?? {});
+    final fingerprint = Wine.generateFingerprint(identity);
+
+    return Wine.fromJson({
+      ...wineData,
+      'fingerprint': fingerprint,
+    });
+  }
+
   String _buildPrompt({
     String? occupation,
     int? budget,
@@ -103,8 +168,8 @@ class KimiService {
       contextParts.add('Current Cuisine Context: $cuisine');
     }
 
-    final contextString = contextParts.isNotEmpty 
-        ? '\n\nUser Context:\n${contextParts.join('\n')}' 
+    final contextString = contextParts.isNotEmpty
+        ? '\n\nUser Context:\n${contextParts.join('\n')}'
         : '';
 
     return '''Analyze this wine image and provide detailed information in STRICT JSON format.$contextString
@@ -200,23 +265,35 @@ IMPORTANT:
 - All numeric values for taste_profile sliders must be 0-100
 - All pairing_score values must be 0-100
 - Include ALL cuisine types listed above
-- If image quality is poor, use conservative estimates and set benchmarks accordingly''';  }
+- If image quality is poor, use conservative estimates and set benchmarks accordingly''';
+  }
 
-  /// Extract JSON from potentially markdown-wrapped content
   String _extractJson(String content) {
-    // Remove markdown code blocks if present
     var cleaned = content.trim();
-    
+
+    // Remove markdown code fences
     if (cleaned.startsWith('```json')) {
       cleaned = cleaned.substring(7);
     } else if (cleaned.startsWith('```')) {
       cleaned = cleaned.substring(3);
     }
-    
     if (cleaned.endsWith('```')) {
       cleaned = cleaned.substring(0, cleaned.length - 3);
     }
-    
-    return cleaned.trim();
+
+    cleaned = cleaned.trim();
+
+    // Find first { and last } as safety net
+    final start = cleaned.indexOf('{');
+    final end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      cleaned = cleaned.substring(start, end + 1);
+    }
+
+    return cleaned;
+  }
+
+  void dispose() {
+    _client.close();
   }
 }
