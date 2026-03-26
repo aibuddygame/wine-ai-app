@@ -2,11 +2,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/constants/app_constants.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/wine_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../ui/components/bento_components.dart';
+import '../../ui/components/vivino_components.dart';
 import '../results/results_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
@@ -54,7 +54,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error selecting image: $e'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: VivinoColors.primary,
         ),
       );
     }
@@ -82,7 +82,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: VivinoColors.background,
       body: SafeArea(
         child: Consumer<WineProvider>(
           builder: (context, wineProvider, _) {
@@ -95,20 +95,35 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   Widget _buildAnalyzingState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const DataBubblesAnimation(),
-          const SizedBox(height: AppTheme.spacingXl),
-          Text(
-            AppConstants.analyzingLabel,
-            style: Theme.of(context).textTheme.headlineSmall,
+          SizedBox(
+            width: 80,
+            height: 80,
+            child: CircularProgressIndicator(
+              strokeWidth: 4,
+              valueColor: AlwaysStoppedAnimation<Color>(VivinoColors.primary),
+            ),
           ),
-          const SizedBox(height: AppTheme.spacingSm),
-          const Text(
-            'Our AI Sommelier is analyzing your wine...',
-            style: TextStyle(color: AppTheme.textSecondary),
+          const SizedBox(height: 32),
+          Text(
+            l10n.analyzingLabel,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: VivinoColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.analyzingSubtitle,
+            style: const TextStyle(
+              color: VivinoColors.textSecondary,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
@@ -116,32 +131,41 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   Widget _buildScannerUI(WineProvider wineProvider) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.spacingLg),
+    final l10n = AppLocalizations.of(context)!;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 40),
           Text(
-            AppConstants.scannerTitle,
-            style: Theme.of(context).textTheme.displaySmall,
+            l10n.scannerTitle,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: VivinoColors.textPrimary,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppTheme.spacingSm),
+          const SizedBox(height: 8),
           Text(
-            AppConstants.scannerSubtitle,
-            style: Theme.of(context).textTheme.bodyLarge,
+            l10n.scannerSubtitle,
+            style: const TextStyle(
+              fontSize: 14,
+              color: VivinoColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppTheme.spacingXxl),
+          const SizedBox(height: 48),
 
           // Scanner Visual Frame
           Container(
             width: 280,
             height: 280,
             decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
-              border: Border.all(color: AppTheme.border, width: 2),
+              color: VivinoColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: VivinoColors.border, width: 2),
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -155,40 +179,42 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     Icon(
                       Icons.document_scanner_outlined,
                       size: 64,
-                      color: AppTheme.accent.withAlpha(128),
+                      color: VivinoColors.primary.withOpacity(0.5),
                     ),
-                    const SizedBox(height: AppTheme.spacingMd),
-                    const Text(
-                      'Position wine label\nwithin frame',
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.positionLabel,
                       textAlign: TextAlign.center,
-                      style:
-                          TextStyle(color: AppTheme.textTertiary, fontSize: 14),
+                      style: const TextStyle(
+                        color: VivinoColors.textTertiary,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppTheme.spacingXxl),
+          const SizedBox(height: 48),
 
           // API key warning
           if (!wineProvider.hasApiKey) ...[
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacingMd),
-              margin: const EdgeInsets.only(bottom: AppTheme.spacingLg),
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                color: AppTheme.warning.withAlpha(26),
-                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                border: Border.all(color: AppTheme.warning.withAlpha(77)),
+                color: VivinoColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: VivinoColors.primary.withOpacity(0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: AppTheme.warning, size: 20),
-                  SizedBox(width: AppTheme.spacingSm),
+                  const Icon(Icons.warning_amber, color: VivinoColors.primary, size: 20),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'API key not configured. Set KIMI_API_KEY to enable scanning.',
-                      style: TextStyle(color: AppTheme.warning, fontSize: 12),
+                      l10n.apiKeyWarning,
+                      style: const TextStyle(color: VivinoColors.primary, fontSize: 12),
                     ),
                   ),
                 ],
@@ -198,50 +224,65 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
           // Capture Button
           SizedBox(
-            width: 200,
+            width: 220,
             height: 56,
             child: ElevatedButton.icon(
               onPressed: _captureImage,
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Capture'),
+              icon: const Icon(Icons.camera_alt, size: 24),
+              label: Text(
+                l10n.captureButton,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: VivinoColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: AppTheme.spacingMd),
+          const SizedBox(height: 16),
 
           // Gallery Button
           TextButton.icon(
             onPressed: _pickFromGallery,
-            icon: const Icon(Icons.photo_library, size: 18),
-            label: const Text('Choose from Gallery'),
+            icon: const Icon(Icons.photo_library, size: 20),
+            label: Text(
+              l10n.galleryButton,
+              style: const TextStyle(fontSize: 14),
+            ),
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.textSecondary,
+              foregroundColor: VivinoColors.textSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
 
           // Error display
           if (wineProvider.error != null) ...[
-            const SizedBox(height: AppTheme.spacingLg),
+            const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacingMd),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.error.withAlpha(26),
-                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                border: Border.all(color: AppTheme.error.withAlpha(77)),
+                color: VivinoColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: VivinoColors.primary.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: AppTheme.error),
-                  const SizedBox(width: AppTheme.spacingSm),
+                  const Icon(Icons.error_outline, color: VivinoColors.primary),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       wineProvider.error!,
                       style: const TextStyle(
-                          color: AppTheme.error, fontSize: 12),
+                        color: VivinoColors.primary,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close,
-                        size: 16, color: AppTheme.error),
+                    icon: const Icon(Icons.close, size: 18, color: VivinoColors.primary),
                     onPressed: () => wineProvider.clearError(),
                   ),
                 ],
@@ -272,10 +313,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
           child: Container(
             width: 30,
             height: 30,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: AppTheme.accent, width: 3),
-                left: BorderSide(color: AppTheme.accent, width: 3),
+                top: BorderSide(color: VivinoColors.primary, width: 3),
+                left: BorderSide(color: VivinoColors.primary, width: 3),
               ),
             ),
           ),

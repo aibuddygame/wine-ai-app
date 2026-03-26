@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/models/search_history_model.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/vault_provider.dart';
 import '../../providers/wine_provider.dart';
-import '../../ui/components/bento_components.dart';
+import '../../ui/components/vivino_components.dart';
 import '../results/results_screen.dart';
 
 class VaultScreen extends StatefulWidget {
@@ -44,14 +44,15 @@ class _VaultScreenState extends State<VaultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: VivinoColors.background,
       body: SafeArea(
         child: Consumer<VaultProvider>(
           builder: (context, vaultProvider, _) {
             if (vaultProvider.isLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: AppTheme.accent),
+                child: CircularProgressIndicator(color: VivinoColors.primary),
               );
             }
 
@@ -59,20 +60,31 @@ class _VaultScreenState extends State<VaultScreen> {
 
             return RefreshIndicator(
               onRefresh: () => vaultProvider.refresh(),
-              color: AppTheme.accent,
-              backgroundColor: AppTheme.surface,
+              color: VivinoColors.primary,
+              backgroundColor: Colors.white,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(AppTheme.spacingLg),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(AppConstants.vaultTitle,
-                        style: Theme.of(context).textTheme.displaySmall),
-                    const SizedBox(height: AppTheme.spacingSm),
-                    Text('Your wine journey and achievements',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    const SizedBox(height: AppTheme.spacingXl),
+                    Text(
+                      l10n.vaultTitle,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: VivinoColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.vaultSubtitle,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: VivinoColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
                     if (stats.totalScans > 0)
                       _buildContent(stats)
                     else
@@ -92,65 +104,77 @@ class _VaultScreenState extends State<VaultScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Stats Grid
-        BentoGrid(
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
-          childAspectRatio: 1.2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.3,
           children: [
-            StatCard(
+            _buildStatCard(
               value: _formatNumber(stats.totalFaceEarned),
               label: AppConstants.totalFaceEarned,
               icon: Icons.emoji_events,
-              color: AppTheme.wineGold,
+              color: VivinoColors.star,
             ),
-            StatCard(
+            _buildStatCard(
               value: 'HKD ${_formatNumber(stats.totalScannedValue)}',
               label: AppConstants.totalScannedValue,
               icon: Icons.account_balance_wallet,
-              color: AppTheme.success,
+              color: VivinoColors.success,
             ),
-            StatCard(
+            _buildStatCard(
               value: stats.totalScans.toString(),
               label: 'Wines Scanned',
               icon: Icons.wine_bar,
-              color: AppTheme.accent,
+              color: VivinoColors.primary,
             ),
-            StatCard(
+            _buildStatCard(
               value: stats.topConsumptionTier,
               label: 'Your Tier',
               icon: Icons.workspace_premium,
-              color: AppTheme.wineRed,
+              color: VivinoColors.primary,
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingLg),
+        const SizedBox(height: 24),
 
         // Favorite cuisine
         if (stats.mostScannedCuisine != '-') ...[
-          BentoCard(
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: VivinoColors.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.accent.withAlpha(51),
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.radiusMedium),
+                    color: VivinoColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.restaurant, color: AppTheme.accent),
+                  child: const Icon(Icons.restaurant, color: VivinoColors.primary),
                 ),
-                const SizedBox(width: AppTheme.spacingMd),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Favorite Cuisine',
-                          style: TextStyle(
-                              color: AppTheme.textTertiary, fontSize: 12)),
+                      const Text(
+                        'Favorite Cuisine',
+                        style: TextStyle(
+                          color: VivinoColors.textTertiary,
+                          fontSize: 12,
+                        ),
+                      ),
                       const SizedBox(height: 2),
                       Text(
                         stats.mostScannedCuisine,
                         style: const TextStyle(
-                          color: AppTheme.textPrimary,
+                          color: VivinoColors.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -161,7 +185,7 @@ class _VaultScreenState extends State<VaultScreen> {
               ],
             ),
           ),
-          const SizedBox(height: AppTheme.spacingLg),
+          const SizedBox(height: 24),
         ],
 
         // Recent Scans Header
@@ -171,25 +195,66 @@ class _VaultScreenState extends State<VaultScreen> {
             const Text(
               AppConstants.scanHistoryLabel,
               style: TextStyle(
-                color: AppTheme.textPrimary,
+                color: VivinoColors.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
             TextButton(
               onPressed: () => context.read<VaultProvider>().refresh(),
+              style: TextButton.styleFrom(
+                foregroundColor: VivinoColors.primary,
+              ),
               child: const Text('Refresh'),
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingMd),
+        const SizedBox(height: 12),
 
         // Scan history items
         ...stats.recentScans.map((scan) => Padding(
-              padding: const EdgeInsets.only(bottom: AppTheme.spacingSm),
+              padding: const EdgeInsets.only(bottom: 12),
               child: _buildHistoryItem(scan),
             )),
       ],
+    );
+  }
+
+  Widget _buildStatCard({
+    required String value,
+    required String label,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: VivinoColors.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: VivinoColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: VivinoColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -198,31 +263,42 @@ class _VaultScreenState extends State<VaultScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: AppTheme.spacingXxl),
+          const SizedBox(height: 80),
           Container(
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+              color: VivinoColors.surface,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
               Icons.wine_bar_outlined,
               size: 48,
-              color: AppTheme.textTertiary,
+              color: VivinoColors.textTertiary,
             ),
           ),
-          const SizedBox(height: AppTheme.spacingLg),
+          const SizedBox(height: 24),
           const Text(
             AppConstants.emptyVaultMessage,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+            style: TextStyle(
+              color: VivinoColors.textSecondary,
+              fontSize: 16,
+            ),
           ),
-          const SizedBox(height: AppTheme.spacingLg),
+          const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: widget.onNavigateToScan,
             icon: const Icon(Icons.camera_alt),
             label: const Text('Start Scanning'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: VivinoColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       ),
@@ -241,20 +317,24 @@ class _VaultScreenState extends State<VaultScreen> {
           );
         }
       },
-      child: BentoCard(
-        padding: const EdgeInsets.all(AppTheme.spacingMd),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: VivinoColors.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           children: [
             Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppTheme.wineRed.withAlpha(51),
-                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                color: VivinoColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.wine_bar, color: AppTheme.wineRed),
+              child: const Icon(Icons.wine_bar, color: VivinoColors.primary),
             ),
-            const SizedBox(width: AppTheme.spacingMd),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,7 +342,7 @@ class _VaultScreenState extends State<VaultScreen> {
                   Text(
                     scan.wineName ?? 'Unknown Wine',
                     style: const TextStyle(
-                      color: AppTheme.textPrimary,
+                      color: VivinoColors.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -274,19 +354,27 @@ class _VaultScreenState extends State<VaultScreen> {
                     children: [
                       if (scan.cuisineContext != null) ...[
                         const Icon(Icons.restaurant,
-                            size: 12, color: AppTheme.textTertiary),
+                            size: 12, color: VivinoColors.textTertiary),
                         const SizedBox(width: 4),
-                        Text(scan.cuisineContext!,
-                            style: const TextStyle(
-                                color: AppTheme.textTertiary, fontSize: 12)),
+                        Text(
+                          scan.cuisineContext!,
+                          style: const TextStyle(
+                            color: VivinoColors.textTertiary,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(width: 12),
                       ],
                       const Icon(Icons.access_time,
-                          size: 12, color: AppTheme.textTertiary),
+                          size: 12, color: VivinoColors.textTertiary),
                       const SizedBox(width: 4),
-                      Text(_formatDate(scan.scannedAt),
-                          style: const TextStyle(
-                              color: AppTheme.textTertiary, fontSize: 12)),
+                      Text(
+                        _formatDate(scan.scannedAt),
+                        style: const TextStyle(
+                          color: VivinoColors.textTertiary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -294,22 +382,21 @@ class _VaultScreenState extends State<VaultScreen> {
             ),
             if (scan.faceEarned != null)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppTheme.wineGold.withAlpha(51),
+                  color: VivinoColors.star.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.emoji_events,
-                        size: 12, color: AppTheme.wineGold),
+                        size: 12, color: VivinoColors.star),
                     const SizedBox(width: 4),
                     Text(
                       '+${scan.faceEarned!.toStringAsFixed(0)}',
                       style: const TextStyle(
-                        color: AppTheme.wineGold,
+                        color: VivinoColors.star,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),

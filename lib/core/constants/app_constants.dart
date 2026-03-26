@@ -46,13 +46,12 @@ class AppConstants {
 
   // Cuisine Options
   static const List<String> cuisines = [
-    'Western',
     'Cantonese',
     'Sichuan',
     'Japanese',
+    'Western',
     'Italian',
     'French',
-    'Thai',
   ];
 
   // Budget Ranges (HKD)
@@ -64,7 +63,7 @@ class AppConstants {
 
   // API
   static const String kimiApiUrl =
-      'https://api.moonshot.cn/v1/chat/completions';
+      'https://api.moonshot.ai/v1/chat/completions';
   static const String kimiModel = 'moonshot-v1-8k-vision-preview';
 
   // Timeouts & Retries

@@ -7,6 +7,8 @@ class WineIdentity {
   final String producer;
   final String region;
   final String subRegion;
+  final String country;
+  final String classification;
   final List<String> grapes;
 
   const WineIdentity({
@@ -15,6 +17,8 @@ class WineIdentity {
     required this.producer,
     required this.region,
     required this.subRegion,
+    this.country = '',
+    this.classification = '',
     required this.grapes,
   });
 
@@ -25,6 +29,8 @@ class WineIdentity {
       producer: (json['producer'] as String?) ?? '',
       region: (json['region'] as String?) ?? '',
       subRegion: (json['sub_region'] as String?) ?? '',
+      country: (json['country'] as String?) ?? '',
+      classification: (json['classification'] as String?) ?? '',
       grapes: (json['grapes'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -38,6 +44,8 @@ class WineIdentity {
         'producer': producer,
         'region': region,
         'sub_region': subRegion,
+        'country': country,
+        'classification': classification,
         'grapes': grapes,
       };
 }
@@ -187,12 +195,14 @@ class DynamicPairing {
   final String pairingRationale;
   final List<String> dishRecommendations;
   final int pairingScore;
+  final List<String> avoidDishes;
 
   const DynamicPairing({
     required this.cuisine,
     required this.pairingRationale,
     required this.dishRecommendations,
     required this.pairingScore,
+    this.avoidDishes = const [],
   });
 
   factory DynamicPairing.fromJson(Map<String, dynamic> json) {
@@ -205,6 +215,10 @@ class DynamicPairing {
           [],
       pairingScore:
           ((json['pairing_score'] as num?)?.toInt() ?? 70).clamp(0, 100),
+      avoidDishes: (json['avoid_dishes'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -213,6 +227,139 @@ class DynamicPairing {
         'pairing_rationale': pairingRationale,
         'dish_recommendations': dishRecommendations,
         'pairing_score': pairingScore,
+        'avoid_dishes': avoidDishes,
+      };
+}
+
+/// Region Style Information
+class RegionStyle {
+  final String description;
+  final String climate;
+  final String typicalProfile;
+
+  const RegionStyle({
+    required this.description,
+    required this.climate,
+    required this.typicalProfile,
+  });
+
+  factory RegionStyle.fromJson(Map<String, dynamic> json) {
+    return RegionStyle(
+      description: (json['description'] as String?) ?? '',
+      climate: (json['climate'] as String?) ?? '',
+      typicalProfile: (json['typical_profile'] as String?) ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'description': description,
+        'climate': climate,
+        'typical_profile': typicalProfile,
+      };
+}
+
+/// Grape Education Information
+class GrapeEducation {
+  final String variety;
+  final String percentage;
+  final String description;
+  final String characteristics;
+
+  const GrapeEducation({
+    required this.variety,
+    required this.percentage,
+    required this.description,
+    required this.characteristics,
+  });
+
+  factory GrapeEducation.fromJson(Map<String, dynamic> json) {
+    return GrapeEducation(
+      variety: (json['variety'] as String?) ?? '',
+      percentage: (json['percentage'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
+      characteristics: (json['characteristics'] as String?) ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'variety': variety,
+        'percentage': percentage,
+        'description': description,
+        'characteristics': characteristics,
+      };
+}
+
+/// Flavor Profile (What People Talk About)
+class FlavorProfile {
+  final List<String> primary;
+  final List<String> secondary;
+  final List<String> tertiary;
+  final List<String> communityQuotes;
+
+  const FlavorProfile({
+    required this.primary,
+    required this.secondary,
+    required this.tertiary,
+    required this.communityQuotes,
+  });
+
+  factory FlavorProfile.fromJson(Map<String, dynamic> json) {
+    return FlavorProfile(
+      primary: (json['primary'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      secondary: (json['secondary'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      tertiary: (json['tertiary'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      communityQuotes: (json['community_quotes'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'primary': primary,
+        'secondary': secondary,
+        'tertiary': tertiary,
+        'community_quotes': communityQuotes,
+      };
+}
+
+/// Community Review
+class CommunityReview {
+  final double rating;
+  final String reviewText;
+  final String source;
+  final int reviewCount;
+
+  const CommunityReview({
+    required this.rating,
+    required this.reviewText,
+    required this.source,
+    required this.reviewCount,
+  });
+
+  factory CommunityReview.fromJson(Map<String, dynamic> json) {
+    return CommunityReview(
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      reviewText: (json['review_text'] as String?) ?? '',
+      source: (json['source'] as String?) ?? '',
+      reviewCount: (json['review_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'rating': rating,
+        'review_text': reviewText,
+        'source': source,
+        'review_count': reviewCount,
       };
 }
 
@@ -225,6 +372,10 @@ class Wine {
   final ServingIntel servingIntel;
   final SocialScripts socialScripts;
   final Map<String, DynamicPairing> pairings;
+  final RegionStyle? regionStyle;
+  final List<GrapeEducation> grapeEducation;
+  final FlavorProfile? flavorProfile;
+  final CommunityReview? communityReview;
   final DateTime? createdAt;
 
   const Wine({
@@ -236,6 +387,10 @@ class Wine {
     required this.servingIntel,
     required this.socialScripts,
     required this.pairings,
+    this.regionStyle,
+    this.grapeEducation = const [],
+    this.flavorProfile,
+    this.communityReview,
     this.createdAt,
   });
 
@@ -248,6 +403,16 @@ class Wine {
         final val = entry.value;
         if (val is Map<String, dynamic>) {
           parsedPairings[key] = DynamicPairing.fromJson(val);
+        }
+      }
+    }
+
+    final rawGrapeEd = json['grape_education'];
+    final List<GrapeEducation> parsedGrapeEd = [];
+    if (rawGrapeEd is List) {
+      for (final item in rawGrapeEd) {
+        if (item is Map<String, dynamic>) {
+          parsedGrapeEd.add(GrapeEducation.fromJson(item));
         }
       }
     }
@@ -266,6 +431,16 @@ class Wine {
       socialScripts: SocialScripts.fromJson(
           (json['social_scripts'] as Map<String, dynamic>?) ?? {}),
       pairings: parsedPairings,
+      regionStyle: json['region_style'] != null
+          ? RegionStyle.fromJson(json['region_style'] as Map<String, dynamic>)
+          : null,
+      grapeEducation: parsedGrapeEd,
+      flavorProfile: json['flavor_profile'] != null
+          ? FlavorProfile.fromJson(json['flavor_profile'] as Map<String, dynamic>)
+          : null,
+      communityReview: json['community_review'] != null
+          ? CommunityReview.fromJson(json['community_review'] as Map<String, dynamic>)
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
@@ -282,6 +457,10 @@ class Wine {
         'social_scripts': socialScripts.toJson(),
         'dynamic_pairing':
             pairings.map((key, value) => MapEntry(key, value.toJson())),
+        if (regionStyle != null) 'region_style': regionStyle!.toJson(),
+        'grape_education': grapeEducation.map((e) => e.toJson()).toList(),
+        if (flavorProfile != null) 'flavor_profile': flavorProfile!.toJson(),
+        if (communityReview != null) 'community_review': communityReview!.toJson(),
         if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
       };
 

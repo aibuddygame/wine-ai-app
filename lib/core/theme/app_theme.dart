@@ -16,9 +16,9 @@ class AppTheme {
   static const Color textSecondary = Color(0xFFB0B0B0);
   static const Color textTertiary = Color(0xFF808080);
 
-  // Accent Colors
-  static const Color accent = Color(0xFF6366F1);
-  static const Color accentLight = Color(0xFF818CF8);
+  // Accent Colors — Vivino Red
+  static const Color accent = Color(0xFFDC143C);
+  static const Color accentLight = Color(0xFFE8475F);
   static const Color success = Color(0xFF22C55E);
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);

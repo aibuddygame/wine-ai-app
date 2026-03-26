@@ -1,0 +1,367 @@
+{
+  "@@locale": "en",
+  "appName": "Wine AI",
+  "@appName": {
+    "description": "Application name"
+  },
+
+  "tabContext": "Context",
+  "@tabContext": {
+    "description": "Context tab label"
+  },
+  "tabScan": "Scan",
+  "@tabScan": {
+    "description": "Scan tab label"
+  },
+  "tabVault": "Vault",
+  "@tabVault": {
+    "description": "Vault tab label"
+  },
+
+  "contextTitle": "Your Context",
+  "@contextTitle": {
+    "description": "Context screen title"
+  },
+  "contextSubtitle": "Help us tailor wine recommendations for your business dinners",
+  "@contextSubtitle": {
+    "description": "Context screen subtitle"
+  },
+  "occupationLabel": "Your Occupation / Industry",
+  "@occupationLabel": {
+    "description": "Occupation input label"
+  },
+  "occupationHint": "e.g., ESG Consultant, Investment Banking",
+  "@occupationHint": {
+    "description": "Occupation input hint"
+  },
+  "budgetLabel": "Typical Bottle Budget (HKD)",
+  "@budgetLabel": {
+    "description": "Budget selection label"
+  },
+  "saveContextButton": "Save Context",
+  "@saveContextButton": {
+    "description": "Save context button"
+  },
+  "editContext": "Edit Context",
+  "@editContext": {
+    "description": "Edit context button"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+
+  "scannerTitle": "Scan Wine",
+  "@scannerTitle": {
+    "description": "Scanner screen title"
+  },
+  "scannerSubtitle": "Take a photo of the wine label or menu",
+  "@scannerSubtitle": {
+    "description": "Scanner screen subtitle"
+  },
+  "captureButton": "Capture",
+  "@captureButton": {
+    "description": "Capture button"
+  },
+  "galleryButton": "Choose from Gallery",
+  "@galleryButton": {
+    "description": "Gallery button"
+  },
+  "analyzingLabel": "Analyzing...",
+  "@analyzingLabel": {
+    "description": "Analyzing loading text"
+  },
+  "analyzingSubtitle": "Our AI Sommelier is analyzing your wine",
+  "@analyzingSubtitle": {
+    "description": "Analyzing subtitle"
+  },
+  "positionLabel": "Position wine label\nwithin frame",
+  "@positionLabel": {
+    "description": "Position label hint"
+  },
+  "apiKeyWarning": "API key not configured. Set KIMI_API_KEY to enable scanning.",
+  "@apiKeyWarning": {
+    "description": "API key not configured warning"
+  },
+
+  "resultsTitle": "Wine Analysis",
+  "@resultsTitle": {
+    "description": "Results screen title"
+  },
+  "regionStyle": "Region & Style",
+  "@regionStyle": {
+    "description": "Region and style section"
+  },
+  "priceBenchmarks": "Price & Benchmarks",
+  "@priceBenchmarks": {
+    "description": "Price and benchmarks section"
+  },
+  "averagePrice": "Average Price",
+  "@averagePrice": {
+    "description": "Average price label"
+  },
+  "globalRanking": "Global Ranking",
+  "@globalRanking": {
+    "description": "Global ranking label"
+  },
+  "regionalRanking": "Regional Ranking",
+  "@regionalRanking": {
+    "description": "Regional ranking label"
+  },
+  "topPercent": "Top {percent}% in {scope}",
+  "@topPercent": {
+    "description": "Top percentage text",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+
+  "tasteProfile": "Taste Profile",
+  "@tasteProfile": {
+    "description": "Taste profile section"
+  },
+  "body": "Body",
+  "@body": {
+    "description": "Body taste characteristic"
+  },
+  "tannin": "Tannin",
+  "@tannin": {
+    "description": "Tannin taste characteristic"
+  },
+  "sweetness": "Sweetness",
+  "@sweetness": {
+    "description": "Sweetness taste characteristic"
+  },
+  "acidity": "Acidity",
+  "@acidity": {
+    "description": "Acidity taste characteristic"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light descriptor"
+  },
+  "bold": "Bold",
+  "@bold": {
+    "description": "Bold descriptor"
+  },
+  "smooth": "Smooth",
+  "@smooth": {
+    "description": "Smooth descriptor"
+  },
+  "tannic": "Tannic",
+  "@tannic": {
+    "description": "Tannic descriptor"
+  },
+  "dry": "Dry",
+  "@dry": {
+    "description": "Dry descriptor"
+  },
+  "sweet": "Sweet",
+  "@sweet": {
+    "description": "Sweet descriptor"
+  },
+  "soft": "Soft",
+  "@soft": {
+    "description": "Soft descriptor"
+  },
+  "acidic": "Acidic",
+  "@acidic": {
+    "description": "Acidic descriptor"
+  },
+
+  "flavors": "Flavors",
+  "@flavors": {
+    "description": "Flavors section"
+  },
+  "primary": "Primary",
+  "@primary": {
+    "description": "Primary aromas"
+  },
+  "secondary": "Secondary",
+  "@secondary": {
+    "description": "Secondary aromas"
+  },
+  "tertiary": "Tertiary (with age)",
+  "@tertiary": {
+    "description": "Tertiary aromas"
+  },
+  "communityMentions": "Community Mentions",
+  "@communityMentions": {
+    "description": "Community mentions section"
+  },
+
+  "socialScripts": "Social Scripts",
+  "@socialScripts": {
+    "description": "Social scripts section"
+  },
+  "theHook": "The Hook",
+  "@theHook": {
+    "description": "The Hook script"
+  },
+  "theObservation": "The Observation",
+  "@theObservation": {
+    "description": "The Observation script"
+  },
+  "theQuestion": "The Question",
+  "@theQuestion": {
+    "description": "The Question script"
+  },
+
+  "serving": "Serving",
+  "@serving": {
+    "description": "Serving section"
+  },
+  "temperature": "Temperature",
+  "@temperature": {
+    "description": "Temperature label"
+  },
+  "decanting": "Decanting",
+  "@decanting": {
+    "description": "Decanting label"
+  },
+  "glass": "Glass",
+  "@glass": {
+    "description": "Glass label"
+  },
+  "proTip": "Pro Tip",
+  "@proTip": {
+    "description": "Pro tip label"
+  },
+
+  "grapes": "Grapes",
+  "@grapes": {
+    "description": "Grapes section"
+  },
+  "aboutGrapes": "About the Grapes",
+  "@aboutGrapes": {
+    "description": "About the grapes section"
+  },
+
+  "pairing": "Pairing",
+  "@pairing": {
+    "description": "Pairing section"
+  },
+  "matchScore": "Match Score",
+  "@matchScore": {
+    "description": "Match score label"
+  },
+  "goesWellWith": "Goes well with:",
+  "@goesWellWith": {
+    "description": "Goes well with label"
+  },
+  "avoid": "Avoid",
+  "@avoid": {
+    "description": "Avoid label"
+  },
+
+  "ranking": "Ranking",
+  "@ranking": {
+    "description": "Ranking section"
+  },
+  "world": "World",
+  "@world": {
+    "description": "World scope"
+  },
+
+  "community": "Community",
+  "@community": {
+    "description": "Community section"
+  },
+  "reviews": "Reviews",
+  "@reviews": {
+    "description": "Reviews section"
+  },
+  "ratings": "ratings",
+  "@ratings": {
+    "description": "Ratings count"
+  },
+
+  "saveToVault": "SAVE TO VAULT",
+  "@saveToVault": {
+    "description": "Save to vault button"
+  },
+  "faceEarned": "Face Earned",
+  "@faceEarned": {
+    "description": "Face earned label"
+  },
+  "points": "points",
+  "@points": {
+    "description": "Points label"
+  },
+  "saved": "Saved to Vault!",
+  "@saved": {
+    "description": "Saved confirmation"
+  },
+
+  "vaultTitle": "Your Vault",
+  "@vaultTitle": {
+    "description": "Vault screen title"
+  },
+  "vaultSubtitle": "Your wine journey and achievements",
+  "@vaultSubtitle": {
+    "description": "Vault screen subtitle"
+  },
+  "totalFaceEarned": "Total Face Earned",
+  "@totalFaceEarned": {
+    "description": "Total face earned stat"
+  },
+  "totalScannedValue": "Total Scanned Value",
+  "@totalScannedValue": {
+    "description": "Total scanned value stat"
+  },
+  "winesScanned": "Wines Scanned",
+  "@winesScanned": {
+    "description": "Wines scanned stat"
+  },
+  "yourTier": "Your Tier",
+  "@yourTier": {
+    "description": "Your tier stat"
+  },
+  "favoriteCuisine": "Favorite Cuisine",
+  "@favoriteCuisine": {
+    "description": "Favorite cuisine label"
+  },
+  "scanHistory": "Scan History",
+  "@scanHistory": {
+    "description": "Scan history section"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button"
+  },
+  "emptyVault": "No wines scanned yet. Start building your vault!",
+  "@emptyVault": {
+    "description": "Empty vault message"
+  },
+  "startScanning": "Start Scanning",
+  "@startScanning": {
+    "description": "Start scanning button"
+  },
+
+  "climate": "Climate",
+  "@climate": {
+    "description": "Climate label"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile label"
+  },
+
+  "language": "Language",
+  "@language": {
+    "description": "Language label"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language"
+  },
+  "traditionalChinese": "繁體中文",
+  "@traditionalChinese": {
+    "description": "Traditional Chinese language"
+  }
+}

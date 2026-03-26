@@ -115,6 +115,7 @@ class KimiService {
     if (response.statusCode != 200) {
       final body = response.body;
       String detail = 'Status ${response.statusCode}';
+      debugPrint('Kimi API Error: Status ${response.statusCode}, Body: $body');
       try {
         final err = jsonDecode(body) as Map<String, dynamic>;
         detail = (err['error']?['message'] as String?) ?? detail;
@@ -123,6 +124,7 @@ class KimiService {
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
+    debugPrint('Kimi API Response: ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}...');
     final choices = data['choices'] as List<dynamic>?;
     if (choices == null || choices.isEmpty) {
       throw const KimiServiceException('Empty response from API');
@@ -183,6 +185,8 @@ Respond ONLY with a JSON object matching this exact structure:
     "producer": "Winery/Producer name",
     "region": "Primary wine region (e.g., Bordeaux, Napa Valley)",
     "sub_region": "Specific sub-region or appellation",
+    "country": "Country of origin",
+    "classification": "Wine classification (e.g., 1er Cru Classé, Grand Cru, DOC)",
     "grapes": ["Grape variety 1", "Grape variety 2"]
   },
   "benchmarks": {
@@ -214,48 +218,77 @@ Respond ONLY with a JSON object matching this exact structure:
     "the_observation": "A sophisticated tasting note that sounds knowledgeable",
     "the_question": "An engaging question to ask the sommelier or host"
   },
+  "region_style": {
+    "description": "Brief description of the region's wine style",
+    "climate": "Climate description (e.g., Maritime, Continental, Mediterranean)",
+    "typical_profile": "Typical characteristics of wines from this region"
+  },
+  "grape_education": [
+    {
+      "variety": "Cabernet Sauvignon",
+      "percentage": "75%",
+      "description": "What this grape contributes to the blend",
+      "characteristics": "Key flavor and structural characteristics"
+    }
+  ],
+  "flavor_profile": {
+    "primary": ["Blackcurrant", "Cedar", "Blackberry"],
+    "secondary": ["Vanilla", "Clove", "Leather"],
+    "tertiary": ["Truffle", "Tobacco", "Earth"],
+    "community_quotes": [
+      "Quote 1 about the wine",
+      "Quote 2 about the wine",
+      "Quote 3 about the wine"
+    ]
+  },
+  "community_review": {
+    "rating": 4.7,
+    "review_text": "Featured review text describing the wine",
+    "source": "Wine Spectator or similar publication",
+    "review_count": 2847
+  },
   "dynamic_pairing": {
     "Western": {
       "cuisine": "Western",
       "pairing_rationale": "Why this wine works with Western cuisine",
       "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+      "avoid_dishes": ["Dish to avoid"],
       "pairing_score": 85
     },
     "Cantonese": {
       "cuisine": "Cantonese",
       "pairing_rationale": "Why this wine works with Cantonese food",
       "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+      "avoid_dishes": ["Dish to avoid"],
       "pairing_score": 80
     },
     "Sichuan": {
       "cuisine": "Sichuan",
       "pairing_rationale": "Why this wine works with Sichuan cuisine",
       "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+      "avoid_dishes": ["Dish to avoid"],
       "pairing_score": 75
     },
     "Japanese": {
       "cuisine": "Japanese",
       "pairing_rationale": "Why this wine works with Japanese cuisine",
       "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+      "avoid_dishes": ["Dish to avoid"],
       "pairing_score": 82
     },
     "Italian": {
       "cuisine": "Italian",
       "pairing_rationale": "Why this wine works with Italian cuisine",
       "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+      "avoid_dishes": ["Dish to avoid"],
       "pairing_score": 88
     },
     "French": {
       "cuisine": "French",
       "pairing_rationale": "Why this wine works with French cuisine",
       "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+      "avoid_dishes": ["Dish to avoid"],
       "pairing_score": 90
-    },
-    "Thai": {
-      "cuisine": "Thai",
-      "pairing_rationale": "Why this wine works with Thai cuisine",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "pairing_score": 70
     }
   }
 }
@@ -264,7 +297,8 @@ IMPORTANT:
 - Return ONLY valid JSON, no markdown formatting, no explanations
 - All numeric values for taste_profile sliders must be 0-100
 - All pairing_score values must be 0-100
-- Include ALL cuisine types listed above
+- Include ALL fields shown in the structure above
+- Make grape_education educational and informative
 - If image quality is poor, use conservative estimates and set benchmarks accordingly''';
   }
 

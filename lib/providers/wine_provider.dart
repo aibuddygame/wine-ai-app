@@ -51,30 +51,36 @@ class WineProvider extends ChangeNotifier {
         cuisine: cuisine,
       );
 
-      // Save to database
-      final wineId = await _db.insertWine(wine);
+      // Save to database (skip on web if database fails)
+      try {
+        final wineId = await _db.insertWine(wine);
 
-      // Create search history entry
-      final faceEarned = SearchHistory.calculateFaceEarned(wine);
-      final history = SearchHistory(
-        wineId: wineId.toString(),
-        wineFingerprint: wine.fingerprint,
-        wineName: wine.identity.fullName,
-        cuisineContext: cuisine ?? _selectedCuisine,
-        budgetContext: budget,
-        scannedAt: DateTime.now(),
-        faceEarned: faceEarned,
-      );
-      await _db.insertSearchHistory(history);
+        // Create search history entry
+        final faceEarned = SearchHistory.calculateFaceEarned(wine);
+        final history = SearchHistory(
+          wineId: wineId.toString(),
+          wineFingerprint: wine.fingerprint,
+          wineName: wine.identity.fullName,
+          cuisineContext: cuisine ?? _selectedCuisine,
+          budgetContext: budget,
+          scannedAt: DateTime.now(),
+          faceEarned: faceEarned,
+        );
+        await _db.insertSearchHistory(history);
+        await _loadWineHistory();
+      } catch (dbError) {
+        debugPrint('Database save skipped (web): $dbError');
+        // On web, just show results without saving to vault
+      }
 
       _currentWine = wine;
-      await _loadWineHistory();
     } on KimiServiceException catch (e) {
-      _error = e.message;
-      debugPrint('WineProvider.analyzeWine KimiError: $e');
-    } catch (e) {
-      _error = 'Failed to analyze wine. Please try again.';
+      _error = 'API Error: ${e.message}';
+      debugPrint('WineProvider.analyzeWine KimiError: ${e.message} (status: ${e.statusCode})');
+    } catch (e, stackTrace) {
+      _error = 'Error: ${e.toString().substring(0, e.toString().length > 100 ? 100 : e.toString().length)}';
       debugPrint('WineProvider.analyzeWine error: $e');
+      debugPrint('Stack trace: $stackTrace');
     } finally {
       _isAnalyzing = false;
       notifyListeners();

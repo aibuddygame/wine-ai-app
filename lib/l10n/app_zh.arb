@@ -1,0 +1,367 @@
+{
+  "@@locale": "zh",
+  "appName": "Wine AI",
+  "@appName": {
+    "description": "Application name"
+  },
+
+  "tabContext": "設定",
+  "@tabContext": {
+    "description": "Context tab label"
+  },
+  "tabScan": "掃描",
+  "@tabScan": {
+    "description": "Scan tab label"
+  },
+  "tabVault": "酒窖",
+  "@tabVault": {
+    "description": "Vault tab label"
+  },
+
+  "contextTitle": "您的設定",
+  "@contextTitle": {
+    "description": "Context screen title"
+  },
+  "contextSubtitle": "幫助我們為您的商務晚餐定制葡萄酒推薦",
+  "@contextSubtitle": {
+    "description": "Context screen subtitle"
+  },
+  "occupationLabel": "您的職業 / 行業",
+  "@occupationLabel": {
+    "description": "Occupation input label"
+  },
+  "occupationHint": "例如：ESG顧問、投資銀行",
+  "@occupationHint": {
+    "description": "Occupation input hint"
+  },
+  "budgetLabel": "典型酒瓶預算（港元）",
+  "@budgetLabel": {
+    "description": "Budget selection label"
+  },
+  "saveContextButton": "保存設定",
+  "@saveContextButton": {
+    "description": "Save context button"
+  },
+  "editContext": "編輯設定",
+  "@editContext": {
+    "description": "Edit context button"
+  },
+  "cancel": "取消",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+
+  "scannerTitle": "掃描葡萄酒",
+  "@scannerTitle": {
+    "description": "Scanner screen title"
+  },
+  "scannerSubtitle": "拍攝葡萄酒標籤或菜單",
+  "@scannerSubtitle": {
+    "description": "Scanner screen subtitle"
+  },
+  "captureButton": "拍攝",
+  "@captureButton": {
+    "description": "Capture button"
+  },
+  "galleryButton": "從相冊選擇",
+  "@galleryButton": {
+    "description": "Gallery button"
+  },
+  "analyzingLabel": "分析中...",
+  "@analyzingLabel": {
+    "description": "Analyzing loading text"
+  },
+  "analyzingSubtitle": "我們的人工智能侍酒師正在分析您的葡萄酒",
+  "@analyzingSubtitle": {
+    "description": "Analyzing subtitle"
+  },
+  "positionLabel": "將葡萄酒標籤\n置於框內",
+  "@positionLabel": {
+    "description": "Position label hint"
+  },
+  "apiKeyWarning": "API 密鑰未配置。請設置 KIMI_API_KEY 以啟用掃描功能。",
+  "@apiKeyWarning": {
+    "description": "API key not configured warning"
+  },
+
+  "resultsTitle": "葡萄酒分析",
+  "@resultsTitle": {
+    "description": "Results screen title"
+  },
+  "regionStyle": "產區與風格",
+  "@regionStyle": {
+    "description": "Region and style section"
+  },
+  "priceBenchmarks": "價格與評比",
+  "@priceBenchmarks": {
+    "description": "Price and benchmarks section"
+  },
+  "averagePrice": "平均價格",
+  "@averagePrice": {
+    "description": "Average price label"
+  },
+  "globalRanking": "全球排名",
+  "@globalRanking": {
+    "description": "Global ranking label"
+  },
+  "regionalRanking": "產區排名",
+  "@regionalRanking": {
+    "description": "Regional ranking label"
+  },
+  "topPercent": "{scope}前{percent}%",
+  "@topPercent": {
+    "description": "Top percentage text",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+
+  "tasteProfile": "口感特徵",
+  "@tasteProfile": {
+    "description": "Taste profile section"
+  },
+  "body": "酒體",
+  "@body": {
+    "description": "Body taste characteristic"
+  },
+  "tannin": "丹寧",
+  "@tannin": {
+    "description": "Tannin taste characteristic"
+  },
+  "sweetness": "甜度",
+  "@sweetness": {
+    "description": "Sweetness taste characteristic"
+  },
+  "acidity": "酸度",
+  "@acidity": {
+    "description": "Acidity taste characteristic"
+  },
+  "light": "輕盈",
+  "@light": {
+    "description": "Light descriptor"
+  },
+  "bold": "濃郁",
+  "@bold": {
+    "description": "Bold descriptor"
+  },
+  "smooth": "柔順",
+  "@smooth": {
+    "description": "Smooth descriptor"
+  },
+  "tannic": "澀口",
+  "@tannic": {
+    "description": "Tannic descriptor"
+  },
+  "dry": "乾型",
+  "@dry": {
+    "description": "Dry descriptor"
+  },
+  "sweet": "甜型",
+  "@sweet": {
+    "description": "Sweet descriptor"
+  },
+  "soft": "柔和",
+  "@soft": {
+    "description": "Soft descriptor"
+  },
+  "acidic": "酸爽",
+  "@acidic": {
+    "description": "Acidic descriptor"
+  },
+
+  "flavors": "風味",
+  "@flavors": {
+    "description": "Flavors section"
+  },
+  "primary": "一級香氣",
+  "@primary": {
+    "description": "Primary aromas"
+  },
+  "secondary": "二級香氣",
+  "@secondary": {
+    "description": "Secondary aromas"
+  },
+  "tertiary": "三級香氣（陳年）",
+  "@tertiary": {
+    "description": "Tertiary aromas"
+  },
+  "communityMentions": "社區提及",
+  "@communityMentions": {
+    "description": "Community mentions section"
+  },
+
+  "socialScripts": "社交腳本",
+  "@socialScripts": {
+    "description": "Social scripts section"
+  },
+  "theHook": "開場白",
+  "@theHook": {
+    "description": "The Hook script"
+  },
+  "theObservation": "觀察點",
+  "@theObservation": {
+    "description": "The Observation script"
+  },
+  "theQuestion": "提問",
+  "@theQuestion": {
+    "description": "The Question script"
+  },
+
+  "serving": "侍酒建議",
+  "@serving": {
+    "description": "Serving section"
+  },
+  "temperature": "溫度",
+  "@temperature": {
+    "description": "Temperature label"
+  },
+  "decanting": "醒酒",
+  "@decanting": {
+    "description": "Decanting label"
+  },
+  "glass": "酒杯",
+  "@glass": {
+    "description": "Glass label"
+  },
+  "proTip": "專業提示",
+  "@proTip": {
+    "description": "Pro tip label"
+  },
+
+  "grapes": "葡萄品種",
+  "@grapes": {
+    "description": "Grapes section"
+  },
+  "aboutGrapes": "關於葡萄品種",
+  "@aboutGrapes": {
+    "description": "About the grapes section"
+  },
+
+  "pairing": "配餐建議",
+  "@pairing": {
+    "description": "Pairing section"
+  },
+  "matchScore": "配對評分",
+  "@matchScore": {
+    "description": "Match score label"
+  },
+  "goesWellWith": "適合搭配：",
+  "@goesWellWith": {
+    "description": "Goes well with label"
+  },
+  "avoid": "避免",
+  "@avoid": {
+    "description": "Avoid label"
+  },
+
+  "ranking": "排名",
+  "@ranking": {
+    "description": "Ranking section"
+  },
+  "world": "全球",
+  "@world": {
+    "description": "World scope"
+  },
+
+  "community": "社區",
+  "@community": {
+    "description": "Community section"
+  },
+  "reviews": "評論",
+  "@reviews": {
+    "description": "Reviews section"
+  },
+  "ratings": "個評分",
+  "@ratings": {
+    "description": "Ratings count"
+  },
+
+  "saveToVault": "加入酒窖",
+  "@saveToVault": {
+    "description": "Save to vault button"
+  },
+  "faceEarned": "獲得面子",
+  "@faceEarned": {
+    "description": "Face earned label"
+  },
+  "points": "分",
+  "@points": {
+    "description": "Points label"
+  },
+  "saved": "已保存到酒窖！",
+  "@saved": {
+    "description": "Saved confirmation"
+  },
+
+  "vaultTitle": "您的酒窖",
+  "@vaultTitle": {
+    "description": "Vault screen title"
+  },
+  "vaultSubtitle": "您的葡萄酒之旅與成就",
+  "@vaultSubtitle": {
+    "description": "Vault screen subtitle"
+  },
+  "totalFaceEarned": "總面子積分",
+  "@totalFaceEarned": {
+    "description": "Total face earned stat"
+  },
+  "totalScannedValue": "總掃描價值",
+  "@totalScannedValue": {
+    "description": "Total scanned value stat"
+  },
+  "winesScanned": "已掃描葡萄酒",
+  "@winesScanned": {
+    "description": "Wines scanned stat"
+  },
+  "yourTier": "您的等級",
+  "@yourTier": {
+    "description": "Your tier stat"
+  },
+  "favoriteCuisine": "最愛菜系",
+  "@favoriteCuisine": {
+    "description": "Favorite cuisine label"
+  },
+  "scanHistory": "掃描記錄",
+  "@scanHistory": {
+    "description": "Scan history section"
+  },
+  "refresh": "重新整理",
+  "@refresh": {
+    "description": "Refresh button"
+  },
+  "emptyVault": "尚末掃描任何葡萄酒。開始建立您的酒窖吧！",
+  "@emptyVault": {
+    "description": "Empty vault message"
+  },
+  "startScanning": "開始掃描",
+  "@startScanning": {
+    "description": "Start scanning button"
+  },
+
+  "climate": "氣候",
+  "@climate": {
+    "description": "Climate label"
+  },
+  "profile": "特徵",
+  "@profile": {
+    "description": "Profile label"
+  },
+
+  "language": "語言",
+  "@language": {
+    "description": "Language label"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language"
+  },
+  "traditionalChinese": "繁體中文",
+  "@traditionalChinese": {
+    "description": "Traditional Chinese language"
+  }
+}

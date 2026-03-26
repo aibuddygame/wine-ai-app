@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'core/theme/app_theme.dart';
+import 'l10n/app_localizations.dart';
 import 'core/constants/app_constants.dart';
 import 'providers/user_provider.dart';
 import 'providers/wine_provider.dart';
 import 'providers/vault_provider.dart';
+import 'providers/language_provider.dart';
 import 'features/context/context_screen.dart';
 import 'features/scanner/scanner_screen.dart';
 import 'features/vault/vault_screen.dart';
+import 'ui/components/vivino_components.dart';
 
 // Web database factory
 import 'db_factory.dart';
@@ -44,12 +47,59 @@ class WineAIApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => WineProvider(apiKey: apiKey)),
         ChangeNotifierProvider(create: (_) => VaultProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
-      child: MaterialApp(
-        title: AppConstants.appName,
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        home: const MainNavigationScreen(),
+      child: Consumer<LanguageProvider>(
+        builder: (context, languageProvider, _) {
+          return MaterialApp(
+            title: AppConstants.appName,
+            debugShowCheckedModeBanner: false,
+            locale: languageProvider.currentLocale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('zh', 'TW'),
+            ],
+            theme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.light,
+              scaffoldBackgroundColor: VivinoColors.background,
+              colorScheme: const ColorScheme.light(
+                primary: VivinoColors.primary,
+                surface: VivinoColors.surface,
+                onSurface: VivinoColors.textPrimary,
+                onPrimary: Colors.white,
+              ),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                centerTitle: true,
+                iconTheme: IconThemeData(color: VivinoColors.textPrimary),
+                titleTextStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: VivinoColors.textPrimary,
+                ),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: VivinoColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            home: const MainNavigationScreen(),
+          );
+        },
       ),
     );
   }
@@ -78,17 +128,24 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: VivinoColors.background,
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppTheme.surface,
+        decoration: BoxDecoration(
+          color: Colors.white,
           border: Border(
-            top: BorderSide(color: AppTheme.border, width: 1),
+            top: BorderSide(color: VivinoColors.border, width: 1),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
         child: SafeArea(
           child: Padding(
@@ -134,14 +191,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           children: [
             Icon(
               isActive ? activeIcon : icon,
-              color: isActive ? AppTheme.accent : AppTheme.textTertiary,
+              color: isActive ? VivinoColors.primary : VivinoColors.textTertiary,
               size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppTheme.accent : AppTheme.textTertiary,
+                color: isActive ? VivinoColors.primary : VivinoColors.textTertiary,
                 fontSize: 12,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -165,14 +222,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: isActive
-                ? [AppTheme.accent, AppTheme.accentLight]
-                : [AppTheme.surfaceLight, AppTheme.surfaceLighter],
+                ? [VivinoColors.primary, VivinoColors.primary.withOpacity(0.8)]
+                : [VivinoColors.surface, VivinoColors.surfaceLight],
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: AppTheme.accent.withAlpha(102),
+                    color: VivinoColors.primary.withOpacity(0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -181,7 +238,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
         child: Icon(
           Icons.document_scanner,
-          color: isActive ? AppTheme.textPrimary : AppTheme.textSecondary,
+          color: isActive ? Colors.white : VivinoColors.textSecondary,
           size: 28,
         ),
       ),
