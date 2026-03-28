@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/repositories/database_helper.dart';
@@ -110,6 +112,185 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
     }
   }
 
+  Future<void> _exportDatabaseDump() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final dbHelper = DatabaseHelper();
+      final wines = await dbHelper.getAllWines();
+      final history = await dbHelper.getSearchHistory(limit: 1000);
+      final user = await dbHelper.getUser();
+      final vaultStats = await dbHelper.getVaultStats();
+
+      final dump = {
+        'exportTimestamp': DateTime.now().toIso8601String(),
+        'exportVersion': '1.0',
+        'database': {
+          'type': kIsWeb ? 'SQLite (Web/IndexedDB)' : 'SQLite (Native)',
+          'platform': kIsWeb ? 'web' : 'native',
+        },
+        'summary': {
+          'totalWines': wines.length,
+          'totalHistoryEntries': history.length,
+          'hasUser': user != null,
+          'totalFaceEarned': vaultStats?.totalFaceEarned ?? 0.0,
+          'totalScannedValue': vaultStats?.totalScannedValue ?? 0.0,
+        },
+        'user': user?.toJson(),
+        'wines': wines.map((w) => w.toJson()).toList(),
+        'searchHistory': history.map((h) => h.toJson()).toList(),
+        'vaultStats': vaultStats != null ? {
+          'totalScans': vaultStats.totalScans,
+          'totalFaceEarned': vaultStats.totalFaceEarned,
+          'totalScannedValue': vaultStats.totalScannedValue,
+          'mostScannedCuisine': vaultStats.mostScannedCuisine,
+          'topConsumptionTier': vaultStats.topConsumptionTier,
+        } : null,
+      };
+
+      final jsonString = const JsonEncoder.withIndent('  ').convert(dump);
+      final fileName = 'wine_ai_dump_${DateTime.now().millisecondsSinceEpoch}.json';
+
+      if (kIsWeb) {
+        // Web: Download as file
+        final blob = html.Blob([jsonString], 'application/json');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', fileName)
+          ..click();
+        html.Url.revokeObjectUrl(url);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Database dump downloaded: $fileName')),
+          );
+        }
+      } else {
+        // Native: Save to documents directory
+        final directory = Directory.systemTemp;
+        final file = File('${directory.path}/$fileName');
+        await file.writeAsString(jsonString);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Database dump saved: ${file.path}')),
+          );
+        }
+      }
+      
+      // Also print to console
+      debugPrint('=== DATABASE DUMP ===');
+      debugPrint(jsonString);
+      debugPrint('=== END DUMP ===');
+      
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error exporting database: $e')),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _printDatabaseToConsole() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final dbHelper = DatabaseHelper();
+      final wines = await dbHelper.getAllWines();
+      final history = await dbHelper.getSearchHistory(limit: 1000);
+      final user = await dbHelper.getUser();
+
+      // Build formatted console output
+      final buffer = StringBuffer();
+      buffer.writeln('\n╔══════════════════════════════════════════════════════════════╗');
+      buffer.writeln('║           WINE AI DATABASE DUMP                              ║');
+      buffer.writeln('║           ${DateTime.now().toString().padRight(45)}║');
+      buffer.writeln('╚══════════════════════════════════════════════════════════════╝\n');
+
+      // User Section
+      buffer.writeln('┌─────────────────────────────────────────────────────────────┐');
+      buffer.writeln('│ USER PROFILE                                                │');
+      buffer.writeln('└─────────────────────────────────────────────────────────────┘');
+      if (user != null) {
+        buffer.writeln('  ID:               ${user.id}');
+        buffer.writeln('  Occupation:       ${user.occupation}');
+        buffer.writeln('  Typical Budget:   \$${user.typicalBudget}');
+        buffer.writeln('  Consumption Tier: ${user.consumptionTier}');
+        buffer.writeln('  Created:          ${user.createdAt}');
+      } else {
+        buffer.writeln('  (No user configured)');
+      }
+      buffer.writeln('');
+
+      // Wines Section
+      buffer.writeln('┌─────────────────────────────────────────────────────────────┐');
+      buffer.writeln('│ WINES (${wines.length} entries)${''.padRight(45 - wines.length.toString().length)}│');
+      buffer.writeln('└─────────────────────────────────────────────────────────────┘');
+      if (wines.isEmpty) {
+        buffer.writeln('  (No wines saved)');
+      } else {
+        for (var i = 0; i < wines.length; i++) {
+          final wine = wines[i];
+          buffer.writeln('\n  [${i + 1}] ${wine.identity.fullName}');
+          buffer.writeln('       ID:          ${wine.id}');
+          buffer.writeln('       Fingerprint: ${wine.fingerprint}');
+          buffer.writeln('       Producer:    ${wine.identity.producer}');
+          buffer.writeln('       Region:      ${wine.identity.region}');
+          buffer.writeln('       Type:        ${wine.identity.wineType}');
+          buffer.writeln('       Vintage:     ${wine.identity.vintage}');
+          buffer.writeln('       Grapes:      ${wine.identity.grapes.join(", ")}');
+          buffer.writeln('       Price:       \$${wine.benchmarks.averagePrice.toStringAsFixed(0)} ${wine.benchmarks.priceCurrency}');
+          buffer.writeln('       Global Rank: Top ${wine.benchmarks.globalTopPercent}%');
+          buffer.writeln('       Created:     ${wine.createdAt}');
+        }
+      }
+      buffer.writeln('');
+
+      // Search History Section
+      buffer.writeln('┌─────────────────────────────────────────────────────────────┐');
+      buffer.writeln('│ SEARCH HISTORY (${history.length} entries)${''.padRight(38 - history.length.toString().length)}│');
+      buffer.writeln('└─────────────────────────────────────────────────────────────┘');
+      if (history.isEmpty) {
+        buffer.writeln('  (No search history)');
+      } else {
+        for (var i = 0; i < history.length; i++) {
+          final h = history[i];
+          buffer.writeln('\n  [${i + 1}] ${h.wineName ?? 'Unknown Wine'}');
+          buffer.writeln('       ID:       ${h.id}');
+          buffer.writeln('       Cuisine:  ${h.cuisineContext ?? '-'}');
+          buffer.writeln('       Budget:   \$${h.budgetContext ?? '-'}');
+          buffer.writeln('       Face:     ${h.faceEarned?.toStringAsFixed(1) ?? '0.0'}');
+          buffer.writeln('       Scanned:  ${h.scannedAt}');
+        }
+      }
+      buffer.writeln('');
+
+      buffer.writeln('╔══════════════════════════════════════════════════════════════╗');
+      buffer.writeln('║                    END OF DATABASE DUMP                      ║');
+      buffer.writeln('╚══════════════════════════════════════════════════════════════╝\n');
+
+      final output = buffer.toString();
+      debugPrint(output);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Database dump printed to console (DevTools)')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error printing database: $e')),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +301,16 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
         foregroundColor: VivinoColors.textPrimary,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: _printDatabaseToConsole,
+            tooltip: 'Print to Console',
+          ),
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: _exportDatabaseDump,
+            tooltip: 'Export JSON',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadAllData,
