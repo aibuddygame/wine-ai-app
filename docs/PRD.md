@@ -1,9 +1,13 @@
 # Wine AI - Product Requirements Document (PRD)
 
-**Version:** 1.0  
-**Date:** March 24, 2026  
+**Version:** 1.1  
+**Date:** March 29, 2026  
 **Prepared for:** R2D2 (CTO/Engineer)  
 **Based on:** Vivino Competitive Research (A-Orb)
+
+**Changelog:**
+- **v1.1 (Mar 29, 2026):** Updated Social Scripts from 3-point (Hook/Observation/Question) to 5-Point Strategic Structure (Prestige/Grape/Region/Vintage/Taste)
+- **v1.0 (Mar 24, 2026):** Initial PRD based on Vivino competitive analysis
 
 ---
 
@@ -15,7 +19,7 @@ Wine AI is an AI-powered wine companion designed for Hong Kong and Asia-Pacific 
 > **"Don't just identify wine. Win the dinner."**
 
 ### Key Differentiator
-AI-generated **Social Scripts** (Hook → Observation → Question) that replace crowd-sourced reviews with situationally-aware talking points tailored to the user's occupation and dining context.
+AI-generated **5-Point Strategic Social Scripts** (Prestige → Grape → Region → Vintage → Taste) that replace crowd-sourced reviews with situationally-aware talking points tailored to the user's occupation and dining context.
 
 ---
 
@@ -100,22 +104,26 @@ For **Asia-Pacific business executives** who **use wine as a social tool**, Wine
 **User Story:** As an executive, I want AI-generated talking points so I can contribute meaningfully to wine conversations.
 
 **Requirements:**
-- Three-part script structure:
-  1. **The Hook** — Attention-grabbing opener
-  2. **The Observation** — Insightful comment about the wine
-  3. **The Question** — Conversation starter for the table
+- **5-Point Strategic Script Structure:**
+  1. **The Hook (Prestige)** — Prestigious fact about winery/award/owner/history as an insider secret
+  2. **The Grape (Character)** — Grape variety personality, blend balance, or varietal characteristics
+  3. **The Region (Terroir)** — Geography impact: climate, soil, altitude and how it affects taste
+  4. **The Vintage (Expert Insight)** — Weather narrative for harvest year (Cool= elegance, Warm= power)
+  5. **The Taste (Sensory Trip)** — Combined tasting experience: flavors up front + finish that lingers
 - Context-aware generation based on:
   - User occupation (Finance, Legal, Tech, etc.)
   - Wine characteristics (region, grape, vintage)
-  - Dining context (if provided)
-- Copy-to-clipboard functionality for each script
+  - Dining context (cuisine type provided)
+- Each point displayed with unique icon and color
+- Bilingual support: English and Traditional Chinese (HK style)
 
 **Acceptance Criteria:**
-- [ ] Scripts generate within API response time
-- [ ] Each script part is clearly labeled
-- [ ] Copy button on each script section
+- [ ] All 5 script points generate within API response time
+- [ ] Each point is clearly labeled with number and category
+- [ ] Each point is a statement (not a question), ~25-35 words
 - [ ] Scripts are conversationally natural (not robotic)
 - [ ] Different occupations get different script tones
+- [ ] Proper Traditional Chinese (繁體中文) for Hong Kong users
 
 #### 4.1.3 Context-Aware Results
 **User Story:** As an executive, I want results tailored to my profile so I get relevant intelligence, not generic facts.

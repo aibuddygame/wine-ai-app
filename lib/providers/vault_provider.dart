@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../data/models/search_history_model.dart';
-import '../data/repositories/database_helper.dart';
+import '../data/repositories/hive_database_helper.dart';
 
 class VaultProvider extends ChangeNotifier {
-  final DatabaseHelper _db = DatabaseHelper();
+  final HiveDatabaseHelper _db = HiveDatabaseHelper();
 
   VaultStats _stats = VaultStats.empty();
   bool _isLoading = false;

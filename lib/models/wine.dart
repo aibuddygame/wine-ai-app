@@ -21,31 +21,41 @@ class BilingualText {
 }
 
 class SocialSurvivalScript {
-  final BilingualText theHook;
-  final BilingualText thePairingLogic;
-  final BilingualText theChitChat;
+  final BilingualText theHook;      // Point 1: Prestige fact
+  final BilingualText theGrape;     // Point 2: Grape character
+  final BilingualText theRegion;    // Point 3: Terroir impact
+  final BilingualText theVintage;   // Point 4: Vintage insight
+  final BilingualText theTaste;     // Point 5: Sensory trip
 
   const SocialSurvivalScript({
     required this.theHook,
-    required this.thePairingLogic,
-    required this.theChitChat,
+    required this.theGrape,
+    required this.theRegion,
+    required this.theVintage,
+    required this.theTaste,
   });
 
   factory SocialSurvivalScript.fromJson(Map<String, dynamic> json) {
     return SocialSurvivalScript(
       theHook: BilingualText.fromJson(
           (json['the_hook'] as Map<String, dynamic>?) ?? {}),
-      thePairingLogic: BilingualText.fromJson(
-          (json['the_pairing_logic'] as Map<String, dynamic>?) ?? {}),
-      theChitChat: BilingualText.fromJson(
-          (json['the_chit_chat'] as Map<String, dynamic>?) ?? {}),
+      theGrape: BilingualText.fromJson(
+          (json['the_grape'] as Map<String, dynamic>?) ?? {}),
+      theRegion: BilingualText.fromJson(
+          (json['the_region'] as Map<String, dynamic>?) ?? {}),
+      theVintage: BilingualText.fromJson(
+          (json['the_vintage'] as Map<String, dynamic>?) ?? {}),
+      theTaste: BilingualText.fromJson(
+          (json['the_taste'] as Map<String, dynamic>?) ?? {}),
     );
   }
 
   Map<String, dynamic> toJson() => {
         'the_hook': theHook.toJson(),
-        'the_pairing_logic': thePairingLogic.toJson(),
-        'the_chit_chat': theChitChat.toJson(),
+        'the_grape': theGrape.toJson(),
+        'the_region': theRegion.toJson(),
+        'the_vintage': theVintage.toJson(),
+        'the_taste': theTaste.toJson(),
       };
 }
 
@@ -188,8 +198,11 @@ class Wine {
 
     final compatJson =
         (json['compatibility'] as Map<String, dynamic>?) ?? {};
+    // Support both old 'social_survival_script' and new 'social_scripts' field names
     final socialJson =
-        (json['social_survival_script'] as Map<String, dynamic>?) ?? {};
+        (json['social_scripts'] as Map<String, dynamic>?) ??
+        (json['social_survival_script'] as Map<String, dynamic>?) ??
+        {};
     final dishesJson =
         (json['recommended_dishes'] as List<dynamic>?) ?? [];
 

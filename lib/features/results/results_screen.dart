@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_constants.dart';
 import '../../data/models/wine_model.dart';
 import '../../providers/wine_provider.dart';
 import '../../ui/components/vivino_components.dart';
+import '../../l10n/app_localizations.dart';
+import 'pairing_explorer.dart';
 
 class ResultsScreen extends StatelessWidget {
   const ResultsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Consumer<WineProvider>(
       builder: (context, wineProvider, _) {
         final wine = wineProvider.currentWine;
 
         if (wine == null) {
-          return const Scaffold(
+          return Scaffold(
             backgroundColor: VivinoColors.background,
             body: Center(
               child: Text(
-                'No wine data available',
-                style: TextStyle(color: VivinoColors.textSecondary),
+                l10n.scanHistory,
+                style: const TextStyle(color: VivinoColors.textSecondary),
               ),
             ),
           );
@@ -64,12 +67,23 @@ class ResultsScreen extends StatelessWidget {
                           imageUrl: null,
                           rating: wine.benchmarks.criticScore?.toDouble() ?? 4.2,
                           ratingCount: wine.communityReview?.reviewCount ?? 2847,
+                          ratingContext: l10n.ratingContext,
                         ),
                       ),
 
                       const SizedBox(height: 24),
 
-                      // 2. WINE IDENTITY - Producer, Name, Region
+                      // 2. ACTION BUTTONS - Rate & Actions
+                      VivinoActionButtons(
+                        rateLabel: l10n.rate,
+                        actionsLabel: l10n.actions,
+                        onRate: () {},
+                        onActions: () {},
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // 3. WINE IDENTITY - Producer, Name, Region
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
@@ -92,11 +106,69 @@ class ResultsScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              '${wine.identity.classification.isNotEmpty ? "${wine.identity.classification} • " : ""}${wine.identity.subRegion}, ${wine.identity.region}, ${wine.identity.country}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: VivinoColors.textSecondary,
+                            Row(
+                              children: [
+                                Text(
+                                  '${_getFlagEmoji(wine.identity.country)} ',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    '${wine.identity.wineType} from ${wine.identity.subRegion}, ${wine.identity.region}, ${wine.identity.country}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: VivinoColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // 4. SUMMARY HEADER
+                      Center(
+                        child: VivinoSectionHeader(
+                          title: l10n.summary,
+                          centered: true,
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // 5. REGION & STYLE TAGS
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            VivinoSectionHeader(title: l10n.region),
+                            const SizedBox(height: 12),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  VivinoRegionTag(
+                                    label: '${wine.identity.subRegion}, ${wine.identity.country}',
+                                    flagEmoji: _getFlagEmoji(wine.identity.country),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            VivinoSectionHeader(title: l10n.regionalStyle),
+                            const SizedBox(height: 12),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  VivinoRegionTag(
+                                    label: '${wine.identity.country} ${wine.identity.grapeVariety.split(' ').first}',
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -105,32 +177,32 @@ class ResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 32),
 
-                      // 3. STYLE - Taste Profile Sliders
+                      // 6. TASTE PROFILE - Style Sliders
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const VivinoSectionHeader(title: 'Style'),
+                            VivinoSectionHeader(title: l10n.tasteProfile),
                             const SizedBox(height: 16),
                             VivinoStyleBar(
-                              leftLabel: 'Light',
-                              rightLabel: 'Bold',
+                              leftLabel: l10n.light,
+                              rightLabel: l10n.bold,
                               value: wine.tasteProfile.lightBold / 100,
                             ),
                             VivinoStyleBar(
-                              leftLabel: 'Smooth',
-                              rightLabel: 'Tannic',
+                              leftLabel: l10n.smooth,
+                              rightLabel: l10n.tannic,
                               value: wine.tasteProfile.smoothTannic / 100,
                             ),
                             VivinoStyleBar(
-                              leftLabel: 'Dry',
-                              rightLabel: 'Sweet',
+                              leftLabel: l10n.dry,
+                              rightLabel: l10n.sweet,
                               value: wine.tasteProfile.drySweet / 100,
                             ),
                             VivinoStyleBar(
-                              leftLabel: 'Soft',
-                              rightLabel: 'Acidic',
+                              leftLabel: l10n.soft,
+                              rightLabel: l10n.acidic,
                               value: wine.tasteProfile.softAcidic / 100,
                             ),
                           ],
@@ -139,14 +211,14 @@ class ResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 32),
 
-                      // 4. FLAVORS - Aroma Tags
+                      // 7. FLAVORS - Aroma Tags
                       if (wine.flavorProfile != null) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const VivinoSectionHeader(title: 'Flavors'),
+                              VivinoSectionHeader(title: l10n.flavors),
                               const SizedBox(height: 12),
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
@@ -167,63 +239,39 @@ class ResultsScreen extends StatelessWidget {
                         const SizedBox(height: 32),
                       ],
 
-                      // 5. REGION & STYLE - Description
-                      if (wine.regionStyle != null) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const VivinoSectionHeader(title: 'Region & Style'),
-                              const SizedBox(height: 12),
-                              Text(
-                                wine.regionStyle!.description,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: VivinoColors.textSecondary,
-                                  height: 1.6,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.wb_sunny_outlined,
-                                    size: 16,
-                                    color: VivinoColors.textTertiary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Climate: ${wine.regionStyle!.climate}',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: VivinoColors.textTertiary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                      // 8. PAIRING EXPLORER - Interactive Cuisine Tabs
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: PairingExplorer(
+                          pairings: wine.pairings,
+                          initialCuisine: _getInitialCuisine(wine.pairings),
                         ),
-                        const SizedBox(height: 32),
-                      ],
+                      ),
 
-                      // 6. GRAPES - Educational Content
+                      const SizedBox(height: 32),
+
+                      // 9. PREMIUM BANNER
+                      VivinoPremiumBanner(
+                        title: l10n.premiumBannerTitle,
+                        ctaLabel: l10n.joinPremium,
+                        onCta: () {},
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // 10. GRAPE SECTION
                       if (wine.grapeEducation.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const VivinoSectionHeader(title: 'Grapes'),
+                              VivinoSectionHeader(title: l10n.grape),
                               const SizedBox(height: 16),
                               ...wine.grapeEducation.map(
                                 (g) => VivinoGrapeItem(
                                   variety: g.variety,
-                                  percentage: g.percentage,
-                                  description: g.description,
+                                  onTap: () {},
                                 ),
                               ),
                             ],
@@ -232,39 +280,141 @@ class ResultsScreen extends StatelessWidget {
                         const SizedBox(height: 32),
                       ],
 
-                      // 7. PAIRING - Food Match
+                      // 11. WINEMAKER'S NOTES
+                      if (wine.winemakerNotes != null && wine.winemakerNotes!.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              VivinoSectionHeader(title: l10n.winemakerNotes),
+                              const SizedBox(height: 12),
+                              VivinoWinemakerNotes(notes: wine.winemakerNotes!),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+
+                      // 12. WINE RANKING - Percentile Charts
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const VivinoSectionHeader(title: 'Pairing'),
+                            VivinoSectionHeader(title: l10n.wineRanking),
                             const SizedBox(height: 16),
-                            VivinoCuisineSelector(
-                              cuisines: AppConstants.cuisines,
-                              selectedCuisine: wineProvider.selectedCuisine,
-                              onSelect: wineProvider.setCuisine,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                VivinoRankingChart(
+                                  scope: l10n.ofWinesInWorld,
+                                  percentile: wine.benchmarks.globalTopPercent,
+                                  badgeText: 'TOP ${wine.benchmarks.globalTopPercent}%',
+                                ),
+                                VivinoRankingChart(
+                                  scope: '${l10n.ofWinesFrom} ${wine.identity.region}',
+                                  percentile: wine.benchmarks.regionalTopPercent,
+                                  badgeText: 'TOP ${wine.benchmarks.regionalTopPercent}%',
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 24),
-                            _buildPairingContent(wine, wineProvider),
+                            const SizedBox(height: 16),
+                            Center(
+                              child: Text(
+                                l10n.bestWineInHistory,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: VivinoColors.textSecondary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
 
                       const SizedBox(height: 32),
 
-                      // 8. SOCIAL SCRIPTS - Our Unique Feature
+                      // 13. REVIEWS SECTION
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const VivinoSectionHeader(title: 'Social Scripts'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                VivinoSectionHeader(
+                                  title: l10n.reviews,
+                                  centered: false,
+                                ),
+                                TextButton(
+                                  onPressed: () {},
+                                  child: Text(
+                                    l10n.addNewReview,
+                                    style: const TextStyle(
+                                      color: VivinoColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            // Review toggle buttons
+                            Row(
+                              children: [
+                                _buildToggleButton(l10n.helpful, true),
+                                const SizedBox(width: 8),
+                                _buildToggleButton(l10n.recent, false),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            if (wine.communityReview != null)
+                              VivinoReviewCard(
+                                rating: wine.communityReview!.rating,
+                                reviewText: wine.communityReview!.reviewText,
+                                source: wine.communityReview!.source,
+                                reviewCount: wine.communityReview!.reviewCount,
+                                authorName: l10n.sampleReviewerName,
+                                authorRatingCount: l10n.sampleReviewerCount,
+                                timeAgo: l10n.sampleTimeAgo,
+                              ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // 14. SOCIAL SCRIPTS - 5-Point Strategic Social Script
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            VivinoSectionHeader(title: l10n.socialScripts),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.socialScriptsSubtitle,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: VivinoColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
                             const SizedBox(height: 12),
                             VivinoSocialScripts(
                               theHook: wine.socialScripts.theHook,
-                              theObservation: wine.socialScripts.theObservation,
-                              theQuestion: wine.socialScripts.theQuestion,
+                              theGrape: wine.socialScripts.theGrape,
+                              theRegion: wine.socialScripts.theRegion,
+                              theVintage: wine.socialScripts.theVintage,
+                              theTaste: wine.socialScripts.theTaste,
+                              hookTitle: l10n.theHook,
+                              grapeTitle: l10n.theGrape,
+                              regionTitle: l10n.theRegion,
+                              vintageTitle: l10n.theVintage,
+                              tasteTitle: l10n.theTaste,
                             ),
                           ],
                         ),
@@ -272,13 +422,13 @@ class ResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 32),
 
-                      // 9. SERVING - Tips
+                      // 15. SERVING - Tips
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const VivinoSectionHeader(title: 'Serving'),
+                            VivinoSectionHeader(title: l10n.serving),
                             const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -286,17 +436,17 @@ class ResultsScreen extends StatelessWidget {
                                 _buildServingItem(
                                   icon: Icons.thermostat,
                                   value: '${wine.servingIntel.temperatureC.toStringAsFixed(0)}°C',
-                                  label: 'Temperature',
+                                  label: l10n.temperature,
                                 ),
                                 _buildServingItem(
                                   icon: Icons.timer_outlined,
                                   value: wine.servingIntel.decantingRecommendation,
-                                  label: 'Decanting',
+                                  label: l10n.decanting,
                                 ),
                                 _buildServingItem(
                                   icon: Icons.wine_bar,
                                   value: wine.servingIntel.glasswareRecommendation,
-                                  label: 'Glass',
+                                  label: l10n.glass,
                                 ),
                               ],
                             ),
@@ -335,49 +485,11 @@ class ResultsScreen extends StatelessWidget {
 
                       const SizedBox(height: 32),
 
-                      // 10. RANKING - Global & Regional Percentiles
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const VivinoSectionHeader(title: 'Ranking'),
-                            const SizedBox(height: 16),
-                            _buildRankingItem(
-                              'World',
-                              wine.benchmarks.globalTopPercent,
-                            ),
-                            const SizedBox(height: 12),
-                            _buildRankingItem(
-                              wine.identity.region,
-                              wine.benchmarks.regionalTopPercent,
-                            ),
-                          ],
-                        ),
+                      // 16. SHOP SIMILAR WINES CTA
+                      VivinoShopSimilarButton(
+                        label: l10n.shopSimilarWines,
+                        onTap: () {},
                       ),
-
-                      const SizedBox(height: 32),
-
-                      // 11. COMMUNITY - Reviews
-                      if (wine.communityReview != null) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const VivinoSectionHeader(title: 'Community'),
-                              const SizedBox(height: 12),
-                              VivinoReviewCard(
-                                rating: wine.communityReview!.rating,
-                                reviewText: wine.communityReview!.reviewText,
-                                source: wine.communityReview!.source,
-                                reviewCount: wine.communityReview!.reviewCount,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                      ],
 
                       // Bottom spacing
                       const SizedBox(height: 100),
@@ -390,9 +502,18 @@ class ResultsScreen extends StatelessWidget {
               VivinoBottomBar(
                 price: wine.benchmarks.averagePrice.toStringAsFixed(0),
                 currency: wine.benchmarks.priceCurrency,
-                onSave: () {
+                saveLabel: l10n.saveToVault,
+                priceLabel: l10n.averagePrice,
+                unavailableText: l10n.unavailableForPurchase,
+                onSave: () async {
+                  final result = await wineProvider.saveCurrentWineToVault();
+                  final isSuccess = result == 'success';
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Saved to Vault!')),
+                    SnackBar(
+                      content: Text(isSuccess ? l10n.saved : result),
+                      backgroundColor: isSuccess ? VivinoColors.success : VivinoColors.primary,
+                      duration: Duration(seconds: isSuccess ? 2 : 5),
+                    ),
                   );
                 },
               ),
@@ -400,73 +521,6 @@ class ResultsScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildPairingContent(Wine wine, WineProvider provider) {
-    final pairing = wine.pairings[provider.selectedCuisine];
-    if (pairing == null) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${pairing.pairingScore}%',
-          style: const TextStyle(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: VivinoColors.primary,
-          ),
-        ),
-        const Text(
-          'Match Score',
-          style: TextStyle(
-            fontSize: 12,
-            color: VivinoColors.textTertiary,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          pairing.pairingRationale,
-          style: const TextStyle(
-            fontSize: 14,
-            color: VivinoColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          'Goes well with:',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: VivinoColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ...pairing.dishRecommendations.map(
-          (dish) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.restaurant,
-                  size: 16,
-                  color: VivinoColors.textTertiary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  dish,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: VivinoColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -499,56 +553,56 @@ class ResultsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRankingItem(String scope, int percentile) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Top $percentile% in $scope',
-              style: const TextStyle(
-                fontSize: 14,
-                color: VivinoColors.textSecondary,
-              ),
-            ),
-            Text(
-              '$percentile%',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: VivinoColors.success,
-              ),
-            ),
-          ],
+  Widget _buildToggleButton(String label, bool isSelected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected ? Colors.black : VivinoColors.border,
         ),
-        const SizedBox(height: 8),
-        Container(
-          height: 6,
-          decoration: BoxDecoration(
-            color: VivinoColors.border,
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Row(
-            children: [
-              Flexible(
-                flex: percentile,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: VivinoColors.success,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-              Flexible(
-                flex: 100 - percentile,
-                child: Container(),
-              ),
-            ],
-          ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: isSelected ? Colors.white : VivinoColors.textPrimary,
         ),
-      ],
+      ),
     );
+  }
+
+  String _getFlagEmoji(String country) {
+    final Map<String, String> flags = {
+      'Chile': '🇨🇱',
+      'France': '🇫🇷',
+      'Italy': '🇮🇹',
+      'Spain': '🇪🇸',
+      'USA': '🇺🇸',
+      'United States': '🇺🇸',
+      'Australia': '🇦🇺',
+      'New Zealand': '🇳🇿',
+      'Argentina': '🇦🇷',
+      'South Africa': '🇿🇦',
+      'Germany': '🇩🇪',
+      'Portugal': '🇵🇹',
+    };
+    return flags[country] ?? '🍷';
+  }
+
+  String _getInitialCuisine(Map<String, DynamicPairing> pairings) {
+    // Priority order for initial cuisine selection
+    const priorityCuisines = ['Western', 'Chinese', 'Japanese', 'Korean', 'Asian'];
+    
+    for (final cuisine in priorityCuisines) {
+      if (pairings.containsKey(cuisine) && pairings[cuisine] != null) {
+        return cuisine;
+      }
+    }
+    
+    // Fallback to first available pairing
+    return pairings.isNotEmpty ? pairings.keys.first : 'Western';
   }
 }

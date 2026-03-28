@@ -199,17 +199,29 @@
   "@socialScripts": {
     "description": "Social scripts section"
   },
-  "theHook": "The Hook",
+  "socialScriptsSubtitle": "5 talking points to impress at your dinner",
+  "@socialScriptsSubtitle": {
+    "description": "Social scripts subtitle explaining the 5 points"
+  },
+  "theHook": "1. The Hook (Prestige)",
   "@theHook": {
-    "description": "The Hook script"
+    "description": "Point 1: Prestige fact about the winery"
   },
-  "theObservation": "The Observation",
-  "@theObservation": {
-    "description": "The Observation script"
+  "theGrape": "2. The Grape (Character)",
+  "@theGrape": {
+    "description": "Point 2: Grape variety personality"
   },
-  "theQuestion": "The Question",
-  "@theQuestion": {
-    "description": "The Question script"
+  "theRegion": "3. The Region (Terroir)",
+  "@theRegion": {
+    "description": "Point 3: Geography and climate impact"
+  },
+  "theVintage": "4. The Vintage (Expert Insight)",
+  "@theVintage": {
+    "description": "Point 4: Weather conditions of the harvest year"
+  },
+  "theTaste": "5. Taste & Flavors (Sensory Trip)",
+  "@theTaste": {
+    "description": "Point 5: Sensory experience combining taste and flavors"
   },
 
   "serving": "Serving",
@@ -363,5 +375,98 @@
   "traditionalChinese": "繁體中文",
   "@traditionalChinese": {
     "description": "Traditional Chinese language"
+  },
+
+  "rate": "Rate",
+  "@rate": {
+    "description": "Rate button"
+  },
+  "actions": "Actions",
+  "@actions": {
+    "description": "Actions button"
+  },
+  "summary": "Summary",
+  "@summary": {
+    "description": "Summary section header"
+  },
+  "region": "Region",
+  "@region": {
+    "description": "Region label"
+  },
+  "regionalStyle": "Regional style",
+  "@regionalStyle": {
+    "description": "Regional style label"
+  },
+  "pairsWellWith": "Pairs well with",
+  "@pairsWellWith": {
+    "description": "Pairs well with label"
+  },
+  "premiumBannerTitle": "Instantly pair any dish or wine you choose",
+  "@premiumBannerTitle": {
+    "description": "Premium banner title"
+  },
+  "joinPremium": "Join Premium",
+  "@joinPremium": {
+    "description": "Join Premium button"
+  },
+  "winemakerNotes": "Winemaker's notes",
+  "@winemakerNotes": {
+    "description": "Winemaker's notes section"
+  },
+  "wineRanking": "Wine ranking",
+  "@wineRanking": {
+    "description": "Wine ranking section"
+  },
+  "ofWinesInWorld": "Of wines in The World",
+  "@ofWinesInWorld": {
+    "description": "Of wines in the world"
+  },
+  "ofWinesFrom": "Of wines from",
+  "@ofWinesFrom": {
+    "description": "Of wines from (region)"
+  },
+  "bestWineInHistory": "This is the best wine in your history",
+  "@bestWineInHistory": {
+    "description": "Best wine in history text"
+  },
+  "addNewReview": "Add a new review",
+  "@addNewReview": {
+    "description": "Add new review link"
+  },
+  "helpful": "Helpful",
+  "@helpful": {
+    "description": "Helpful toggle"
+  },
+  "recent": "Recent",
+  "@recent": {
+    "description": "Recent toggle"
+  },
+  "sampleReviewerName": "Wine Enthusiast",
+  "@sampleReviewerName": {
+    "description": "Sample reviewer name"
+  },
+  "sampleReviewerCount": "264 ratings",
+  "@sampleReviewerCount": {
+    "description": "Sample reviewer rating count"
+  },
+  "sampleTimeAgo": "2 years ago",
+  "@sampleTimeAgo": {
+    "description": "Sample time ago"
+  },
+  "shopSimilarWines": "Shop similar wines",
+  "@shopSimilarWines": {
+    "description": "Shop similar wines button"
+  },
+  "unavailableForPurchase": "Unavailable for purchase",
+  "@unavailableForPurchase": {
+    "description": "Unavailable for purchase banner"
+  },
+  "ratingContext": "That's about average",
+  "@ratingContext": {
+    "description": "Rating context text"
+  },
+  "grape": "Grape",
+  "@grape": {
+    "description": "Grape (singular)"
   }
 }

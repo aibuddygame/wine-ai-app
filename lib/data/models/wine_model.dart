@@ -9,6 +9,8 @@ class WineIdentity {
   final String subRegion;
   final String country;
   final String classification;
+  final String wineType;
+  final String grapeVariety;
   final List<String> grapes;
 
   const WineIdentity({
@@ -19,6 +21,8 @@ class WineIdentity {
     required this.subRegion,
     this.country = '',
     this.classification = '',
+    this.wineType = 'Red wine',
+    this.grapeVariety = '',
     required this.grapes,
   });
 
@@ -31,6 +35,8 @@ class WineIdentity {
       subRegion: (json['sub_region'] as String?) ?? '',
       country: (json['country'] as String?) ?? '',
       classification: (json['classification'] as String?) ?? '',
+      wineType: (json['wine_type'] as String?) ?? 'Red wine',
+      grapeVariety: (json['grape_variety'] as String?) ?? '',
       grapes: (json['grapes'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -46,6 +52,8 @@ class WineIdentity {
         'sub_region': subRegion,
         'country': country,
         'classification': classification,
+        'wine_type': wineType,
+        'grape_variety': grapeVariety,
         'grapes': grapes,
       };
 }
@@ -165,28 +173,36 @@ class ServingIntel {
 }
 
 class SocialScripts {
-  final String theHook;
-  final String theObservation;
-  final String theQuestion;
+  final String theHook;           // Point 1: Prestige fact
+  final String theGrape;          // Point 2: Grape character
+  final String theRegion;         // Point 3: Terroir impact
+  final String theVintage;        // Point 4: Vintage insight
+  final String theTaste;          // Point 5: Sensory trip
 
   const SocialScripts({
     required this.theHook,
-    required this.theObservation,
-    required this.theQuestion,
+    required this.theGrape,
+    required this.theRegion,
+    required this.theVintage,
+    required this.theTaste,
   });
 
   factory SocialScripts.fromJson(Map<String, dynamic> json) {
     return SocialScripts(
       theHook: (json['the_hook'] as String?) ?? '',
-      theObservation: (json['the_observation'] as String?) ?? '',
-      theQuestion: (json['the_question'] as String?) ?? '',
+      theGrape: (json['the_grape'] as String?) ?? '',
+      theRegion: (json['the_region'] as String?) ?? '',
+      theVintage: (json['the_vintage'] as String?) ?? '',
+      theTaste: (json['the_taste'] as String?) ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
         'the_hook': theHook,
-        'the_observation': theObservation,
-        'the_question': theQuestion,
+        'the_grape': theGrape,
+        'the_region': theRegion,
+        'the_vintage': theVintage,
+        'the_taste': theTaste,
       };
 }
 
@@ -376,6 +392,7 @@ class Wine {
   final List<GrapeEducation> grapeEducation;
   final FlavorProfile? flavorProfile;
   final CommunityReview? communityReview;
+  final String? winemakerNotes;
   final DateTime? createdAt;
 
   const Wine({
@@ -391,6 +408,7 @@ class Wine {
     this.grapeEducation = const [],
     this.flavorProfile,
     this.communityReview,
+    this.winemakerNotes,
     this.createdAt,
   });
 
@@ -441,6 +459,9 @@ class Wine {
       communityReview: json['community_review'] != null
           ? CommunityReview.fromJson(json['community_review'] as Map<String, dynamic>)
           : null,
+      winemakerNotes: (json['winemaker_notes'] as String?) ??
+          (json['winemaker_nose'] as String?) ??
+          (json['nose'] as String?),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
@@ -461,6 +482,7 @@ class Wine {
         'grape_education': grapeEducation.map((e) => e.toJson()).toList(),
         if (flavorProfile != null) 'flavor_profile': flavorProfile!.toJson(),
         if (communityReview != null) 'community_review': communityReview!.toJson(),
+        if (winemakerNotes != null) 'winemaker_notes': winemakerNotes,
         if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
       };
 
@@ -468,5 +490,40 @@ class Wine {
     final data =
         '${identity.producer}|${identity.vintage}|${identity.region}'.toLowerCase();
     return md5.convert(utf8.encode(data)).toString();
+  }
+
+  /// Create a copy of this wine with optional field overrides
+  Wine copyWith({
+    String? id,
+    String? fingerprint,
+    WineIdentity? identity,
+    WineBenchmarks? benchmarks,
+    TasteProfile? tasteProfile,
+    ServingIntel? servingIntel,
+    SocialScripts? socialScripts,
+    Map<String, DynamicPairing>? pairings,
+    RegionStyle? regionStyle,
+    List<GrapeEducation>? grapeEducation,
+    FlavorProfile? flavorProfile,
+    CommunityReview? communityReview,
+    String? winemakerNotes,
+    DateTime? createdAt,
+  }) {
+    return Wine(
+      id: id ?? this.id,
+      fingerprint: fingerprint ?? this.fingerprint,
+      identity: identity ?? this.identity,
+      benchmarks: benchmarks ?? this.benchmarks,
+      tasteProfile: tasteProfile ?? this.tasteProfile,
+      servingIntel: servingIntel ?? this.servingIntel,
+      socialScripts: socialScripts ?? this.socialScripts,
+      pairings: pairings ?? this.pairings,
+      regionStyle: regionStyle ?? this.regionStyle,
+      grapeEducation: grapeEducation ?? this.grapeEducation,
+      flavorProfile: flavorProfile ?? this.flavorProfile,
+      communityReview: communityReview ?? this.communityReview,
+      winemakerNotes: winemakerNotes ?? this.winemakerNotes,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
 }

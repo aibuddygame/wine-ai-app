@@ -2,12 +2,13 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../data/models/wine_model.dart';
 import '../data/models/search_history_model.dart';
-import '../data/repositories/database_helper.dart';
+import '../data/repositories/hive_database_helper.dart';
+import '../data/services/cached_wine_service.dart';
 import '../data/services/kimi_service.dart';
 
 class WineProvider extends ChangeNotifier {
-  final DatabaseHelper _db = DatabaseHelper();
-  final KimiService _kimiService;
+  final HiveDatabaseHelper _db = HiveDatabaseHelper();
+  final CachedWineService _cachedWineService;
 
   Wine? _currentWine;
   List<Wine> _wineHistory = [];
@@ -20,13 +21,13 @@ class WineProvider extends ChangeNotifier {
   bool get isAnalyzing => _isAnalyzing;
   String? get error => _error;
   String get selectedCuisine => _selectedCuisine;
-  bool get hasApiKey => _kimiService.hasApiKey;
+  bool get hasApiKey => _cachedWineService.hasApiKey;
 
   DynamicPairing? get currentPairing =>
       _currentWine?.pairings[_selectedCuisine];
 
   WineProvider({required String apiKey})
-      : _kimiService = KimiService(apiKey: apiKey);
+      : _cachedWineService = CachedWineService(apiKey: apiKey);
 
   void setCuisine(String cuisine) {
     _selectedCuisine = cuisine;
@@ -44,7 +45,7 @@ class WineProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final wine = await _kimiService.analyzeWineImage(
+      final wine = await _cachedWineService.analyzeWine(
         imageBytes,
         occupation: occupation,
         budget: budget,
@@ -96,6 +97,35 @@ class WineProvider extends ChangeNotifier {
     }
   }
 
+  Future<String> saveCurrentWineToVault() async {
+    if (_currentWine == null) {
+      return 'Error: No wine to save';
+    }
+    
+    try {
+      final wineId = await _db.insertWine(_currentWine!);
+      
+      // Create search history entry
+      final faceEarned = SearchHistory.calculateFaceEarned(_currentWine!);
+      final history = SearchHistory(
+        wineId: wineId.toString(),
+        wineFingerprint: _currentWine!.fingerprint,
+        wineName: _currentWine!.identity.fullName,
+        cuisineContext: _selectedCuisine,
+        scannedAt: DateTime.now(),
+        faceEarned: faceEarned,
+      );
+      
+      await _db.insertSearchHistory(history);
+      await _loadWineHistory();
+      
+      notifyListeners();
+      return 'success';
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+
   Future<void> _loadWineHistory() async {
     try {
       _wineHistory = await _db.getAllWines();
@@ -118,5 +148,10 @@ class WineProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Get cache statistics for debugging
+  Future<Map<String, dynamic>> getCacheStats() async {
+    return await _cachedWineService.getCacheStats();
   }
 }

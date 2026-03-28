@@ -1,9 +1,14 @@
 # Wine AI - Technical Requirements Document (TRD)
 
-**Version:** 1.0  
-**Date:** March 24, 2026  
+**Version:** 1.1  
+**Date:** March 29, 2026  
 **Author:** R2D2 (CTO/Engineer)  
-**Status:** Draft  
+**Status:** Draft
+
+**Changelog:**
+- **v1.2 (Mar 29, 2026):** Added Multi-Cuisine Pairing Engine section with 5 cuisine categories (Chinese/Japanese/Korean/Western/Asian) and interactive Pairing Explorer UI component.
+- **v1.1 (Mar 29, 2026):** Updated Social Scripts data model from 3 fields to 5 fields (the_hook/the_grape/the_region/the_vintage/the_taste). Updated API prompt structure and validation logic.
+- **v1.0 (Mar 24, 2026):** Initial TRD for P0 features  
 
 ---
 
@@ -399,14 +404,11 @@ Respond ONLY with valid JSON matching this structure:
   "taste_profile": { ... },
   "serving_intel": { ... },
   "social_scripts": {
-    "the_hook": "string",
-    "the_observation": "string", 
-    "the_question": "string",
-    "context_used": {
-      "tone": "string",
-      "formality": "string",
-      "cuisine": "string"
-    }
+    "the_hook": "Point 1 - Prestige fact as insider secret statement",
+    "the_grape": "Point 2 - Grape personality/balance statement",
+    "the_region": "Point 3 - Geography/terroir impact statement",
+    "the_vintage": "Point 4 - Weather narrative for harvest year",
+    "the_taste": "Point 5 - Sensory journey combining flavors + finish"
   },
   "dynamic_pairing": { ... }
 }
@@ -420,18 +422,26 @@ Respond ONLY with valid JSON matching this structure:
 class SocialScriptsValidator {
   static const int minLength = 20;
   static const int maxLength = 200;
+  static const int targetLength = 25; // ~25-35 words per point
   
   static ValidationResult validate(SocialScripts scripts) {
     final errors = <String>[];
     
+    // Validate all 5 points
     if (scripts.theHook.length < minLength) {
-      errors.add('Hook too short');
+      errors.add('Hook (Prestige) too short');
     }
-    if (scripts.theObservation.length < minLength) {
-      errors.add('Observation too short');
+    if (scripts.theGrape.length < minLength) {
+      errors.add('Grape (Character) too short');
     }
-    if (scripts.theQuestion.length < minLength) {
-      errors.add('Question too short');
+    if (scripts.theRegion.length < minLength) {
+      errors.add('Region (Terroir) too short');
+    }
+    if (scripts.theVintage.length < minLength) {
+      errors.add('Vintage (Insight) too short');
+    }
+    if (scripts.theTaste.length < minLength) {
+      errors.add('Taste (Sensory) too short');
     }
     
     // Check for generic/template language
@@ -494,14 +504,65 @@ class WineCacheManager {
 
 ### 5.1 P0 Features (Must-Have)
 
-#### 5.1.1 Enhanced Social Scripts Engine
+#### 5.1.1 Enhanced Social Scripts Engine (5-Point Strategic)
 
 **Requirements:**
-- Generate context-aware conversation starters
-- Support 3 script tones: casual, professional, executive
-- Adapt to dining occasion (business dinner, casual, celebration)
+- Generate 5-point strategic social scripts with narrative arc:
+  1. Prestige (Hook) → 2. Grape (Character) → 3. Region (Terroir) → 4. Vintage (Insight) → 5. Taste (Sensory)
+- Support bilingual output: English + Traditional Chinese (HK style)
+- Each point: statement format (not question), ~25-35 words
+- Context-aware based on occupation, budget, and cuisine
 - Provide fallback scripts for API failures
 - Cache scripts per wine + context combination
+
+---
+
+#### 5.1.2 Multi-Cuisine Pairing Engine
+
+**Overview:**
+Interactive cuisine pairing explorer with 5 cuisine categories, each with specific pairing logic tailored to the wine's characteristics.
+
+**Cuisine Categories & Logic:**
+
+| Cuisine | Focus | Logic | Example Dishes |
+|---------|-------|-------|----------------|
+| **Chinese** | Umami & Fat | How wine handles salt/sugar in soy-braised meats, dim sum | Soy-braised Pork Belly, Dim Sum, Kung Pao Chicken |
+| **Japanese** | Cleanliness & Delicacy | How wine respects subtle flavors without overpowering | Toro Sashimi, Tempura, Wagyu Tataki |
+| **Korean** | Fermentation & Spice | How wine handles high-acid/spicy ferments | Galbi BBQ, Kimchi Stew, Bulgogi |
+| **Western** | Protein & Cream | Traditional tannin/acid balancing with butter/fat | Ribeye Steak, Creamy Pasta, Roasted Lamb |
+| **Asian (SEA)** | Aromatics & Heat | How wine interacts with coconut milk and chili | Thai Green Curry, Lemongrass Chicken, Satay |
+
+**Output Requirements (per cuisine):**
+```json
+{
+  "cuisine": "Chinese",
+  "pairing_rationale": "15 words max explaining the specific logic",
+  "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
+  "avoid_dishes": ["Dish to avoid"],
+  "pairing_score": 85
+}
+```
+
+**UI Implementation:**
+```dart
+class PairingExplorer extends StatefulWidget {
+  final Map<String, DynamicPairing> pairings;
+  
+  // Features:
+  // - Horizontal scrollable tabs: Chinese, Japanese, Korean, Western, Asian
+  // - Active: Black bg, white text, 24px radius
+  // - Inactive: Transparent bg, gray text, no borders
+  // - Bento-style card with compatibility score + dish chips
+  // - Fade animation on tab switch
+}
+```
+
+**Technical Requirements:**
+- Tab bar must be horizontally scrollable
+- Content card updates instantly on tab tap
+- LayoutAnimation or Moti for fade-in effect
+- Score color coding: 90+ Green, 80-89 Wine Red, 70-79 Orange, <70 Gray
+- Each cuisine shows emoji indicator and logic title
 
 **Technical Implementation:**
 ```dart

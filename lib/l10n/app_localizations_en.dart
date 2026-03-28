@@ -151,13 +151,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialScripts => 'Social Scripts';
 
   @override
-  String get theHook => 'The Hook';
+  String get socialScriptsSubtitle =>
+      '5 talking points to impress at your dinner';
 
   @override
-  String get theObservation => 'The Observation';
+  String get theHook => '1. The Hook (Prestige)';
 
   @override
-  String get theQuestion => 'The Question';
+  String get theGrape => '2. The Grape (Character)';
+
+  @override
+  String get theRegion => '3. The Region (Terroir)';
+
+  @override
+  String get theVintage => '4. The Vintage (Expert Insight)';
+
+  @override
+  String get theTaste => '5. Taste & Flavors (Sensory Trip)';
 
   @override
   String get serving => 'Serving';
@@ -266,4 +276,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get traditionalChinese => '繁體中文';
+
+  @override
+  String get rate => 'Rate';
+
+  @override
+  String get actions => 'Actions';
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get region => 'Region';
+
+  @override
+  String get regionalStyle => 'Regional style';
+
+  @override
+  String get pairsWellWith => 'Pairs well with';
+
+  @override
+  String get premiumBannerTitle => 'Instantly pair any dish or wine you choose';
+
+  @override
+  String get joinPremium => 'Join Premium';
+
+  @override
+  String get winemakerNotes => 'Winemaker\'s notes';
+
+  @override
+  String get wineRanking => 'Wine ranking';
+
+  @override
+  String get ofWinesInWorld => 'Of wines in The World';
+
+  @override
+  String get ofWinesFrom => 'Of wines from';
+
+  @override
+  String get bestWineInHistory => 'This is the best wine in your history';
+
+  @override
+  String get addNewReview => 'Add a new review';
+
+  @override
+  String get helpful => 'Helpful';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get sampleReviewerName => 'Wine Enthusiast';
+
+  @override
+  String get sampleReviewerCount => '264 ratings';
+
+  @override
+  String get sampleTimeAgo => '2 years ago';
+
+  @override
+  String get shopSimilarWines => 'Shop similar wines';
+
+  @override
+  String get unavailableForPurchase => 'Unavailable for purchase';
+
+  @override
+  String get ratingContext => 'That\'s about average';
+
+  @override
+  String get grape => 'Grape';
 }

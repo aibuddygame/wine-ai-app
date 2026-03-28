@@ -149,13 +149,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get socialScripts => '社交腳本';
 
   @override
-  String get theHook => '開場白';
+  String get socialScriptsSubtitle => '5個談話要點，讓您在晚宴上留下深刻印象';
 
   @override
-  String get theObservation => '觀察點';
+  String get theHook => '1. 開場白（聲望）';
 
   @override
-  String get theQuestion => '提問';
+  String get theGrape => '2. 葡萄品種（個性）';
+
+  @override
+  String get theRegion => '3. 產區（風土）';
+
+  @override
+  String get theVintage => '4. 年份（專家見解）';
+
+  @override
+  String get theTaste => '5. 味道與風味（感官之旅）';
 
   @override
   String get serving => '侍酒建議';
@@ -264,6 +273,75 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get traditionalChinese => '繁體中文';
+
+  @override
+  String get rate => '評分';
+
+  @override
+  String get actions => '操作';
+
+  @override
+  String get summary => '摘要';
+
+  @override
+  String get region => '產區';
+
+  @override
+  String get regionalStyle => '地區風格';
+
+  @override
+  String get pairsWellWith => '適合搭配';
+
+  @override
+  String get premiumBannerTitle => '即時配對任何菜餚或葡萄酒';
+
+  @override
+  String get joinPremium => '加入高級版';
+
+  @override
+  String get winemakerNotes => '釀酒師筆記';
+
+  @override
+  String get wineRanking => '葡萄酒排名';
+
+  @override
+  String get ofWinesInWorld => '全球葡萄酒中';
+
+  @override
+  String get ofWinesFrom => '來自';
+
+  @override
+  String get bestWineInHistory => '這是您歷史上最好的葡萄酒';
+
+  @override
+  String get addNewReview => '添加新評論';
+
+  @override
+  String get helpful => '有用';
+
+  @override
+  String get recent => '最近';
+
+  @override
+  String get sampleReviewerName => '葡萄酒愛好者';
+
+  @override
+  String get sampleReviewerCount => '264 個評分';
+
+  @override
+  String get sampleTimeAgo => '2 年前';
+
+  @override
+  String get shopSimilarWines => '購買類似葡萄酒';
+
+  @override
+  String get unavailableForPurchase => '暫無法購買';
+
+  @override
+  String get ratingContext => '評分一般';
+
+  @override
+  String get grape => '葡萄';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -411,13 +489,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get socialScripts => '社交腳本';
 
   @override
-  String get theHook => '開場白';
+  String get socialScriptsSubtitle => '5個談話要點，讓您在晚宴上留下深刻印象';
 
   @override
-  String get theObservation => '觀察點';
+  String get theHook => '1. 開場白（聲望）';
 
   @override
-  String get theQuestion => '提問';
+  String get theGrape => '2. 葡萄品種（個性）';
+
+  @override
+  String get theRegion => '3. 產區（風土）';
+
+  @override
+  String get theVintage => '4. 年份（專家見解）';
+
+  @override
+  String get theTaste => '5. 味道與風味（感官之旅）';
 
   @override
   String get serving => '侍酒建議';
@@ -526,4 +613,73 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get traditionalChinese => '繁體中文';
+
+  @override
+  String get rate => '評分';
+
+  @override
+  String get actions => '操作';
+
+  @override
+  String get summary => '摘要';
+
+  @override
+  String get region => '產區';
+
+  @override
+  String get regionalStyle => '地區風格';
+
+  @override
+  String get pairsWellWith => '適合搭配';
+
+  @override
+  String get premiumBannerTitle => '即時配對任何菜餚或葡萄酒';
+
+  @override
+  String get joinPremium => '加入進階版';
+
+  @override
+  String get winemakerNotes => '釀酒師筆記';
+
+  @override
+  String get wineRanking => '葡萄酒排名';
+
+  @override
+  String get ofWinesInWorld => '全球葡萄酒中';
+
+  @override
+  String get ofWinesFrom => '來自';
+
+  @override
+  String get bestWineInHistory => '這是您歷史上最好的葡萄酒';
+
+  @override
+  String get addNewReview => '新增評論';
+
+  @override
+  String get helpful => '有用';
+
+  @override
+  String get recent => '最近';
+
+  @override
+  String get sampleReviewerName => '葡萄酒愛好者';
+
+  @override
+  String get sampleReviewerCount => '264 個評分';
+
+  @override
+  String get sampleTimeAgo => '2 年前';
+
+  @override
+  String get shopSimilarWines => '購買類似葡萄酒';
+
+  @override
+  String get unavailableForPurchase => '暫無法購買';
+
+  @override
+  String get ratingContext => '評分一般';
+
+  @override
+  String get grape => '葡萄';
 }

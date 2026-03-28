@@ -48,6 +48,10 @@ dependencies:
   # Local storage
   shared_preferences: ^2.3.2
 
+  # Hive NoSQL database
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

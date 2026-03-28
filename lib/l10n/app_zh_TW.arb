@@ -199,17 +199,29 @@
   "@socialScripts": {
     "description": "Social scripts section"
   },
-  "theHook": "開場白",
+  "socialScriptsSubtitle": "5個談話要點，讓您在晚宴上留下深刻印象",
+  "@socialScriptsSubtitle": {
+    "description": "Social scripts subtitle explaining the 5 points"
+  },
+  "theHook": "1. 開場白（聲望）",
   "@theHook": {
-    "description": "The Hook script"
+    "description": "Point 1: Prestige fact about the winery"
   },
-  "theObservation": "觀察點",
-  "@theObservation": {
-    "description": "The Observation script"
+  "theGrape": "2. 葡萄品種（個性）",
+  "@theGrape": {
+    "description": "Point 2: Grape variety personality"
   },
-  "theQuestion": "提問",
-  "@theQuestion": {
-    "description": "The Question script"
+  "theRegion": "3. 產區（風土）",
+  "@theRegion": {
+    "description": "Point 3: Geography and climate impact"
+  },
+  "theVintage": "4. 年份（專家見解）",
+  "@theVintage": {
+    "description": "Point 4: Weather conditions of the harvest year"
+  },
+  "theTaste": "5. 味道與風味（感官之旅）",
+  "@theTaste": {
+    "description": "Point 5: Sensory experience combining taste and flavors"
   },
 
   "serving": "侍酒建議",
@@ -363,5 +375,98 @@
   "traditionalChinese": "繁體中文",
   "@traditionalChinese": {
     "description": "Traditional Chinese language"
+  },
+
+  "rate": "評分",
+  "@rate": {
+    "description": "Rate button"
+  },
+  "actions": "操作",
+  "@actions": {
+    "description": "Actions button"
+  },
+  "summary": "摘要",
+  "@summary": {
+    "description": "Summary section header"
+  },
+  "region": "產區",
+  "@region": {
+    "description": "Region label"
+  },
+  "regionalStyle": "地區風格",
+  "@regionalStyle": {
+    "description": "Regional style label"
+  },
+  "pairsWellWith": "適合搭配",
+  "@pairsWellWith": {
+    "description": "Pairs well with label"
+  },
+  "premiumBannerTitle": "即時配對任何菜餚或葡萄酒",
+  "@premiumBannerTitle": {
+    "description": "Premium banner title"
+  },
+  "joinPremium": "加入進階版",
+  "@joinPremium": {
+    "description": "Join Premium button"
+  },
+  "winemakerNotes": "釀酒師筆記",
+  "@winemakerNotes": {
+    "description": "Winemaker's notes section"
+  },
+  "wineRanking": "葡萄酒排名",
+  "@wineRanking": {
+    "description": "Wine ranking section"
+  },
+  "ofWinesInWorld": "全球葡萄酒中",
+  "@ofWinesInWorld": {
+    "description": "Of wines in the world"
+  },
+  "ofWinesFrom": "來自",
+  "@ofWinesFrom": {
+    "description": "Of wines from (region)"
+  },
+  "bestWineInHistory": "這是您歷史上最好的葡萄酒",
+  "@bestWineInHistory": {
+    "description": "Best wine in history text"
+  },
+  "addNewReview": "新增評論",
+  "@addNewReview": {
+    "description": "Add new review link"
+  },
+  "helpful": "有用",
+  "@helpful": {
+    "description": "Helpful toggle"
+  },
+  "recent": "最近",
+  "@recent": {
+    "description": "Recent toggle"
+  },
+  "sampleReviewerName": "葡萄酒愛好者",
+  "@sampleReviewerName": {
+    "description": "Sample reviewer name"
+  },
+  "sampleReviewerCount": "264 個評分",
+  "@sampleReviewerCount": {
+    "description": "Sample reviewer rating count"
+  },
+  "sampleTimeAgo": "2 年前",
+  "@sampleTimeAgo": {
+    "description": "Sample time ago"
+  },
+  "shopSimilarWines": "購買類似葡萄酒",
+  "@shopSimilarWines": {
+    "description": "Shop similar wines button"
+  },
+  "unavailableForPurchase": "暫無法購買",
+  "@unavailableForPurchase": {
+    "description": "Unavailable for purchase banner"
+  },
+  "ratingContext": "評分一般",
+  "@ratingContext": {
+    "description": "Rating context text"
+  },
+  "grape": "葡萄",
+  "@grape": {
+    "description": "Grape (singular)"
   }
 }

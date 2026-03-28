@@ -375,23 +375,41 @@ abstract class AppLocalizations {
   /// **'Social Scripts'**
   String get socialScripts;
 
-  /// The Hook script
+  /// Social scripts subtitle explaining the 5 points
   ///
   /// In en, this message translates to:
-  /// **'The Hook'**
+  /// **'5 talking points to impress at your dinner'**
+  String get socialScriptsSubtitle;
+
+  /// Point 1: Prestige fact about the winery
+  ///
+  /// In en, this message translates to:
+  /// **'1. The Hook (Prestige)'**
   String get theHook;
 
-  /// The Observation script
+  /// Point 2: Grape variety personality
   ///
   /// In en, this message translates to:
-  /// **'The Observation'**
-  String get theObservation;
+  /// **'2. The Grape (Character)'**
+  String get theGrape;
 
-  /// The Question script
+  /// Point 3: Geography and climate impact
   ///
   /// In en, this message translates to:
-  /// **'The Question'**
-  String get theQuestion;
+  /// **'3. The Region (Terroir)'**
+  String get theRegion;
+
+  /// Point 4: Weather conditions of the harvest year
+  ///
+  /// In en, this message translates to:
+  /// **'4. The Vintage (Expert Insight)'**
+  String get theVintage;
+
+  /// Point 5: Sensory experience combining taste and flavors
+  ///
+  /// In en, this message translates to:
+  /// **'5. Taste & Flavors (Sensory Trip)'**
+  String get theTaste;
 
   /// Serving section
   ///
@@ -608,6 +626,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'繁體中文'**
   String get traditionalChinese;
+
+  /// Rate button
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get rate;
+
+  /// Actions button
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actions;
+
+  /// Summary section header
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// Region label
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get region;
+
+  /// Regional style label
+  ///
+  /// In en, this message translates to:
+  /// **'Regional style'**
+  String get regionalStyle;
+
+  /// Pairs well with label
+  ///
+  /// In en, this message translates to:
+  /// **'Pairs well with'**
+  String get pairsWellWith;
+
+  /// Premium banner title
+  ///
+  /// In en, this message translates to:
+  /// **'Instantly pair any dish or wine you choose'**
+  String get premiumBannerTitle;
+
+  /// Join Premium button
+  ///
+  /// In en, this message translates to:
+  /// **'Join Premium'**
+  String get joinPremium;
+
+  /// Winemaker's notes section
+  ///
+  /// In en, this message translates to:
+  /// **'Winemaker\'s notes'**
+  String get winemakerNotes;
+
+  /// Wine ranking section
+  ///
+  /// In en, this message translates to:
+  /// **'Wine ranking'**
+  String get wineRanking;
+
+  /// Of wines in the world
+  ///
+  /// In en, this message translates to:
+  /// **'Of wines in The World'**
+  String get ofWinesInWorld;
+
+  /// Of wines from (region)
+  ///
+  /// In en, this message translates to:
+  /// **'Of wines from'**
+  String get ofWinesFrom;
+
+  /// Best wine in history text
+  ///
+  /// In en, this message translates to:
+  /// **'This is the best wine in your history'**
+  String get bestWineInHistory;
+
+  /// Add new review link
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new review'**
+  String get addNewReview;
+
+  /// Helpful toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Helpful'**
+  String get helpful;
+
+  /// Recent toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// Sample reviewer name
+  ///
+  /// In en, this message translates to:
+  /// **'Wine Enthusiast'**
+  String get sampleReviewerName;
+
+  /// Sample reviewer rating count
+  ///
+  /// In en, this message translates to:
+  /// **'264 ratings'**
+  String get sampleReviewerCount;
+
+  /// Sample time ago
+  ///
+  /// In en, this message translates to:
+  /// **'2 years ago'**
+  String get sampleTimeAgo;
+
+  /// Shop similar wines button
+  ///
+  /// In en, this message translates to:
+  /// **'Shop similar wines'**
+  String get shopSimilarWines;
+
+  /// Unavailable for purchase banner
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable for purchase'**
+  String get unavailableForPurchase;
+
+  /// Rating context text
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s about average'**
+  String get ratingContext;
+
+  /// Grape (singular)
+  ///
+  /// In en, this message translates to:
+  /// **'Grape'**
+  String get grape;
 }
 
 class _AppLocalizationsDelegate

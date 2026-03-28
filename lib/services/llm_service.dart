@@ -149,7 +149,7 @@ class LlmService {
   String _buildSystemPrompt(String cuisine) {
     return '''You are a wine expert and social wingman for Hong Kong business executives.
 
-TASK: Identify the wine from the label image and return STRICT JSON:
+TASK: Identify the wine from the label image and return STRICT JSON with 5-POINT STRATEGIC SOCIAL SCRIPT:
 
 {
   "wine_name": "string",
@@ -173,18 +173,26 @@ TASK: Identify the wine from the label image and return STRICT JSON:
     "score": 0-100,
     "cuisine": "$cuisine"
   },
-  "social_survival_script": {
+  "social_scripts": {
     "the_hook": {
-      "zh": "Traditional Chinese text about history/prestige",
-      "en": "English text about history/prestige"
+      "zh": "Traditional Chinese - One prestigious fact: award, famous owner, or unique history as insider secret",
+      "en": "English - One prestigious fact: award, famous owner, or unique history as insider secret"
     },
-    "the_pairing_logic": {
-      "zh": "Traditional Chinese explaining why wine matches cuisine",
-      "en": "English explaining why wine matches cuisine"
+    "the_grape": {
+      "zh": "Traditional Chinese - Grape's role/personality: blend balance OR single varietal character",
+      "en": "English - Grape's role/personality: blend balance OR single varietal character"
     },
-    "the_chit_chat": {
-      "zh": "Traditional Chinese professional question",
-      "en": "English professional question"
+    "the_region": {
+      "zh": "Traditional Chinese - Geography impact: one environmental factor (breezes, soil, altitude) and how it affects taste",
+      "en": "English - Geography impact: one environmental factor (breezes, soil, altitude) and how it affects taste"
+    },
+    "the_vintage": {
+      "zh": "Traditional Chinese - Weather narrative: Cool= elegance/acidity OR Warm= bold fruit/power. Frame difficult years as 'triumph of quality'",
+      "en": "English - Weather narrative: Cool= elegance/acidity OR Warm= bold fruit/power. Frame difficult years as 'triumph of quality'"
+    },
+    "the_taste": {
+      "zh": "Traditional Chinese - Sensory journey: flavors up front + finish characteristic that lingers",
+      "en": "English - Sensory journey: flavors up front + finish characteristic that lingers"
     }
   },
   "recommended_dishes": [
@@ -196,7 +204,12 @@ TASK: Identify the wine from the label image and return STRICT JSON:
   ]
 }
 
-CRITICAL: All Traditional Chinese must use proper characters (繁體中文). The pairing logic must explain how the wine's specific characteristics (acidity, tannins, body) complement the chosen cuisine's flavor profile. Return ONLY valid JSON, no markdown, no prose.''';
+CRITICAL RULES:
+1. ALL 5 social script points MUST be included - no exceptions
+2. Each point needs BOTH "zh" (繁體中文) and "en" fields
+3. Traditional Chinese must use proper Hong Kong style characters
+4. Return ONLY valid JSON, no markdown, no prose
+5. The 5 points should build a narrative arc: Prestige → Grape → Region → Vintage → Taste''';
   }
 
   String _extractJson(String content) {

@@ -107,7 +107,7 @@ class KimiService {
               },
             ],
             'temperature': 0.3,
-            'max_tokens': 2000,
+            'max_tokens': 3000,
           }),
         )
         .timeout(AppConstants.apiTimeout);
@@ -214,9 +214,11 @@ Respond ONLY with a JSON object matching this exact structure:
     "glassware_recommendation": "Large Bordeaux glass"
   },
   "social_scripts": {
-    "the_hook": "Interesting historical fact or unique story about this wine",
-    "the_observation": "A sophisticated tasting note that sounds knowledgeable",
-    "the_question": "An engaging question to ask the sommelier or host"
+    "the_hook": "Point 1 - PRESTIGE: One prestigious fact about the winery (award, famous owner, unique history). Write as a confident statement sharing an insider secret. Length: 1-2 sentences, ~25-35 words.",
+    "the_grape": "Point 2 - GRAPE CHARACTER: Describe the grape's personality as a statement. If blend, explain the balance. If single varietal, explain its 'personality'. Length: 1-2 sentences, ~25-35 words.",
+    "the_region": "Point 3 - TERROIR: Explain geography's impact as a statement. Mention one environmental factor and how it makes the wine taste finer or bolder. Length: 1-2 sentences, ~25-35 words.",
+    "the_vintage": "Point 4 - VINTAGE INSIGHT: Research the harvest year's climate as a statement. Cool/Slow = elegance/acidity, Warm/Fast = bold fruit/power. Frame difficult years as 'triumph of quality over quantity'. Length: 1-2 sentences, ~25-35 words.",
+    "the_taste": "Point 5 - SENSORY TRIP: Guide through tasting as a statement. Combine flavors with texture. Use: 'You'll notice [flavors] up front, followed by a [velvety/acidic/etc] finish that lingers.' Length: 1-2 sentences, ~25-35 words."
   },
   "region_style": {
     "description": "Brief description of the region's wine style",
@@ -248,47 +250,40 @@ Respond ONLY with a JSON object matching this exact structure:
     "review_count": 2847
   },
   "dynamic_pairing": {
-    "Western": {
-      "cuisine": "Western",
-      "pairing_rationale": "Why this wine works with Western cuisine",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "avoid_dishes": ["Dish to avoid"],
+    "Chinese": {
+      "cuisine": "Chinese",
+      "pairing_rationale": "15 words max. Focus on Umami & Fat logic: How wine handles salt/sugar in soy-braised meats, dim sum. Example: 'Tannins cut through rich soy-glazed pork while complementing umami depth.'",
+      "dish_recommendations": ["Soy-braised Pork Belly", "Dim Sum Selection", "Kung Pao Chicken"],
+      "avoid_dishes": ["Very sweet desserts"],
       "pairing_score": 85
-    },
-    "Cantonese": {
-      "cuisine": "Cantonese",
-      "pairing_rationale": "Why this wine works with Cantonese food",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "avoid_dishes": ["Dish to avoid"],
-      "pairing_score": 80
-    },
-    "Sichuan": {
-      "cuisine": "Sichuan",
-      "pairing_rationale": "Why this wine works with Sichuan cuisine",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "avoid_dishes": ["Dish to avoid"],
-      "pairing_score": 75
     },
     "Japanese": {
       "cuisine": "Japanese",
-      "pairing_rationale": "Why this wine works with Japanese cuisine",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "avoid_dishes": ["Dish to avoid"],
-      "pairing_score": 82
-    },
-    "Italian": {
-      "cuisine": "Italian",
-      "pairing_rationale": "Why this wine works with Italian cuisine",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "avoid_dishes": ["Dish to avoid"],
+      "pairing_rationale": "15 words max. Focus on Cleanliness & Delicacy logic: How wine respects subtle flavors without overpowering. Example: 'High acidity mirrors wasabi heat while respecting delicate fish textures.'",
+      "dish_recommendations": ["Toro Sashimi", "Tempura Selection", "Wagyu Tataki"],
+      "avoid_dishes": ["Overly spicy rolls"],
       "pairing_score": 88
     },
-    "French": {
-      "cuisine": "French",
-      "pairing_rationale": "Why this wine works with French cuisine",
-      "dish_recommendations": ["Dish 1", "Dish 2", "Dish 3"],
-      "avoid_dishes": ["Dish to avoid"],
+    "Korean": {
+      "cuisine": "Korean",
+      "pairing_rationale": "15 words max. Focus on Fermentation & Spice logic: How wine handles high-acid/spicy ferments. Example: 'Fruit-forward profile balances kimchi acidity and BBQ spice heat.'",
+      "dish_recommendations": ["Galbi BBQ", "Kimchi Stew", "Bulgogi"],
+      "avoid_dishes": ["Extremely spicy dishes"],
+      "pairing_score": 82
+    },
+    "Western": {
+      "cuisine": "Western",
+      "pairing_rationale": "15 words max. Focus on Protein & Cream logic: Traditional tannin/acid balancing with butter/fat. Example: 'Bold tannins structure matches marbled steak fat perfectly.'",
+      "dish_recommendations": ["Ribeye Steak", "Creamy Pasta", "Roasted Lamb"],
+      "avoid_dishes": ["Overly acidic salads"],
       "pairing_score": 90
+    },
+    "Asian": {
+      "cuisine": "Asian",
+      "pairing_rationale": "15 words max. Focus on Aromatics & Heat logic: How wine interacts with coconut milk and chili. Example: 'Stone fruit notes complement Thai basil and coconut cream richness.'",
+      "dish_recommendations": ["Thai Green Curry", "Lemongrass Chicken", "Satay Skewers"],
+      "avoid_dishes": ["Extremely hot curries"],
+      "pairing_score": 78
     }
   }
 }
@@ -299,7 +294,16 @@ IMPORTANT:
 - All pairing_score values must be 0-100
 - Include ALL fields shown in the structure above
 - Make grape_education educational and informative
-- If image quality is poor, use conservative estimates and set benchmarks accordingly''';
+- If image quality is poor, use conservative estimates and set benchmarks accordingly
+
+MULTI-CUISINE PAIRING LOGIC:
+- Chinese: Umami & Fat (soy-braised meats, dim sum) - How wine handles salt/sugar
+- Japanese: Cleanliness & Delicacy (sashimi, tempura) - How wine respects subtle flavors
+- Korean: Fermentation & Spice (kimchi, BBQ) - How wine handles high-acid/spicy ferments
+- Western: Protein & Cream (steak, pasta) - Traditional tannin/acid balancing with butter/fat
+- Asian (SEA): Aromatics & Heat (Thai curry, lemongrass) - How wine interacts with coconut milk and chili
+
+Each pairing_rationale must be MAX 15 WORDS and explain the specific logic for that cuisine type.''';
   }
 
   String _extractJson(String content) {

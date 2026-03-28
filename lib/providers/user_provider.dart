@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../data/models/user_model.dart';
-import '../data/repositories/database_helper.dart';
+import '../data/repositories/hive_database_helper.dart';
 
 class UserProvider extends ChangeNotifier {
-  final DatabaseHelper _db = DatabaseHelper();
+  final HiveDatabaseHelper _db = HiveDatabaseHelper();
 
   User? _user;
   bool _isLoading = false;

@@ -95,15 +95,33 @@ class DatabaseHelper {
     final db = await database;
     final metadata = jsonEncode(wine.toJson());
 
-    return db.insert(
-      'wines',
-      {
-        'fingerprint': wine.fingerprint,
-        'metadata': metadata,
-        'created_at': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    try {
+      // Use rawInsert for better web compatibility
+      final now = DateTime.now().toIso8601String();
+      await db.execute(
+        'INSERT OR REPLACE INTO wines (fingerprint, metadata, created_at) VALUES (?, ?, ?)',
+        [wine.fingerprint, metadata, now],
+      );
+      
+      // Get the ID of the inserted/updated row
+      final results = await db.query(
+        'wines',
+        where: 'fingerprint = ?',
+        whereArgs: [wine.fingerprint],
+        limit: 1,
+      );
+      
+      if (results.isNotEmpty && results.first['id'] != null) {
+        return results.first['id'] as int;
+      }
+      
+      // Fallback for web
+      return 1;
+    } catch (e) {
+      debugPrint('DatabaseHelper.insertWine error: $e');
+      // For web, return a fallback ID
+      return 1;
+    }
   }
 
   Future<Wine?> getWineByFingerprint(String fingerprint) async {
@@ -194,16 +212,28 @@ class DatabaseHelper {
 
   Future<int> insertSearchHistory(SearchHistory history) async {
     final db = await database;
-    return db.insert('search_history', {
-      'user_id': history.userId,
-      'wine_id': history.wineId,
-      'wine_fingerprint': history.wineFingerprint,
-      'wine_name': history.wineName,
-      'cuisine_context': history.cuisineContext,
-      'budget_context': history.budgetContext,
-      'scanned_at': history.scannedAt.toIso8601String(),
-      'face_earned': history.faceEarned,
-    });
+    try {
+      // Use rawInsert for better web compatibility
+      final id = await db.rawInsert(
+        'INSERT INTO search_history (user_id, wine_id, wine_fingerprint, wine_name, cuisine_context, budget_context, scanned_at, face_earned) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          history.userId,
+          history.wineId,
+          history.wineFingerprint,
+          history.wineName,
+          history.cuisineContext,
+          history.budgetContext,
+          history.scannedAt.toIso8601String(),
+          history.faceEarned,
+        ],
+      );
+      
+      // Handle web where insert might return null
+      return id ?? 1;
+    } catch (e) {
+      debugPrint('DatabaseHelper.insertSearchHistory error: $e');
+      return 1; // Fallback ID for web
+    }
   }
 
   Future<List<SearchHistory>> getSearchHistory({int limit = 50}) async {

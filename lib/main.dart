@@ -12,16 +12,17 @@ import 'providers/language_provider.dart';
 import 'features/context/context_screen.dart';
 import 'features/scanner/scanner_screen.dart';
 import 'features/vault/vault_screen.dart';
+import 'features/debug/debug_screen.dart';
 import 'ui/components/vivino_components.dart';
 
-// Web database factory
-import 'db_factory.dart';
+// Database
+import 'data/repositories/hive_database_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize web database factory
-  await initDatabaseFactory();
+  // Initialize Hive database
+  await HiveDatabaseHelper().init();
 
   // Load .env (gracefully handle missing file)
   try {
@@ -119,6 +120,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() => _currentIndex = 1);
   }
 
+  void _navigateToDebug() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DebugScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = <Widget>[
@@ -129,6 +137,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     return Scaffold(
       backgroundColor: VivinoColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          _currentIndex == 0 
+            ? 'Context' 
+            : _currentIndex == 1 
+              ? 'Scan Wine' 
+              : 'Vault',
+          style: const TextStyle(
+            color: VivinoColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: VivinoColors.textSecondary),
+            onPressed: _navigateToDebug,
+            tooltip: 'Debug',
+          ),
+        ],
+      ),
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
