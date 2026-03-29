@@ -50,16 +50,23 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
 
       // Load from Hive database (primary storage used by the app)
       final dbHelper = HiveDatabaseHelper();
+      
+      // Get stats first for debugging
+      _hiveStats = await dbHelper.getStats();
+      debugPrint('DebugScreen: Hive stats = $_hiveStats');
+      
       _wines = await dbHelper.getAllWines();
+      debugPrint('DebugScreen: Loaded ${_wines.length} wines');
+      
       _searchHistory = await dbHelper.getSearchHistory(limit: 100);
+      debugPrint('DebugScreen: Loaded ${_searchHistory.length} history entries');
+      
       _user = await dbHelper.getUser();
       _vaultStats = await dbHelper.getVaultStats();
-
-      // Load Hive stats
-      _hiveStats = await dbHelper.getStats();
       
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('Error loading debug data: $e');
+      debugPrint('Stack trace: $stackTrace');
     }
     
     setState(() => _isLoading = false);
@@ -360,6 +367,17 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
               _buildInfoRow('Total Wines', _wines.length.toString()),
               _buildInfoRow('Search History', _searchHistory.length.toString()),
               _buildInfoRow('User Configured', _user != null ? 'Yes' : 'No'),
+              const Divider(),
+              _buildInfoRow('Hive Wine Keys', (_hiveStats['winesKeys'] as List<dynamic>?)?.length.toString() ?? '0'),
+              _buildInfoRow('Hive History Keys', (_hiveStats['historyKeys'] as List<dynamic>?)?.length.toString() ?? '0'),
+              if ((_hiveStats['winesKeys'] as List<dynamic>?)?.isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Keys: ${(_hiveStats['winesKeys'] as List<dynamic>).take(5).join(', ')}${_hiveStats['winesKeys'].length > 5 ? '...' : ''}',
+                    style: const TextStyle(fontSize: 10, color: VivinoColors.textSecondary),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 16),
