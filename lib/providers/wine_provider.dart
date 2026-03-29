@@ -52,14 +52,11 @@ class WineProvider extends ChangeNotifier {
         cuisine: cuisine,
       );
 
-      // Save to database (skip on web if database fails)
+      // Create search history entry only (wine already saved by CachedWineService)
       try {
-        final wineId = await _db.insertWine(wine);
-
-        // Create search history entry
         final faceEarned = SearchHistory.calculateFaceEarned(wine);
         final history = SearchHistory(
-          wineId: wineId.toString(),
+          wineId: wine.fingerprint,
           wineFingerprint: wine.fingerprint,
           wineName: wine.identity.fullName,
           cuisineContext: cuisine ?? _selectedCuisine,
@@ -70,8 +67,8 @@ class WineProvider extends ChangeNotifier {
         await _db.insertSearchHistory(history);
         await _loadWineHistory();
       } catch (dbError) {
-        debugPrint('Database save skipped (web): $dbError');
-        // On web, just show results without saving to vault
+        debugPrint('Search history save skipped (web): $dbError');
+        // On web, just show results without saving history
       }
 
       _currentWine = wine;

@@ -138,8 +138,8 @@ class CachedWineService {
     // Step 2: Check database for existing wine
     final cachedWine = await _db.getWineByFingerprint(fingerprint);
     
-    if (cachedWine != null) {
-      debugPrint('CachedWineService: Found wine in database');
+    if (cachedWine != null && !cachedWine.isCacheExpired) {
+      debugPrint('CachedWineService: Found wine in database (not expired)');
       
       // Step 3: Check completeness
       final status = WineFieldStatus.fromWine(cachedWine);
@@ -161,18 +161,18 @@ class CachedWineService {
           cuisine: cuisine,
         );
       }
-    } else {
-      // Step 4: No cached wine - generate all fields
-      debugPrint('CachedWineService: Wine not in database, generating full content...');
-      return await _generateFullWine(
-        imageBytes: imageBytes,
-        identity: identity,
-        fingerprint: fingerprint,
-        occupation: occupation,
-        budget: budget,
-        cuisine: cuisine,
-      );
     }
+    
+    // Step 4: No cached wine or cache expired - generate all fields
+    debugPrint('CachedWineService: Generating full wine content...');
+    return await _generateFullWine(
+      imageBytes: imageBytes,
+      identity: identity,
+      fingerprint: fingerprint,
+      occupation: occupation,
+      budget: budget,
+      cuisine: cuisine,
+    );
   }
 
   /// Step 1: Get basic identity from AI (lightweight call)
@@ -202,9 +202,10 @@ class CachedWineService {
       cuisine: cuisine,
     );
 
-    // Ensure fingerprint is set
+    // Ensure fingerprint is set and cache timestamp is recorded
     final completeWine = wine.copyWith(
       fingerprint: fingerprint,
+      cachedAt: DateTime.now(),
     );
 
     // Save to database
@@ -239,11 +240,12 @@ class CachedWineService {
     );
 
     // Merge: Keep cached data, fill in missing fields from new data
+    // Also update the cachedAt timestamp since we're refreshing the data
     final enhancedWine = _mergeWines(
       cached: cachedWine,
       fresh: newWine,
       missingFields: missingFields,
-    );
+    ).copyWith(cachedAt: DateTime.now());
 
     // Save enhanced version back to database
     try {

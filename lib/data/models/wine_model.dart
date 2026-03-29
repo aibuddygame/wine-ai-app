@@ -394,6 +394,16 @@ class Wine {
   final CommunityReview? communityReview;
   final String? winemakerNotes;
   final DateTime? createdAt;
+  final DateTime? cachedAt;
+
+  /// Cache expiration duration (30 days)
+  static const Duration cacheExpiration = Duration(days: 30);
+
+  /// Check if the cached wine has expired (older than 30 days)
+  bool get isCacheExpired {
+    if (cachedAt == null) return true;
+    return DateTime.now().difference(cachedAt!) > cacheExpiration;
+  }
 
   const Wine({
     this.id,
@@ -410,6 +420,7 @@ class Wine {
     this.communityReview,
     this.winemakerNotes,
     this.createdAt,
+    this.cachedAt,
   });
 
   factory Wine.fromJson(Map<String, dynamic> json) {
@@ -465,6 +476,9 @@ class Wine {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
+      cachedAt: json['cached_at'] != null
+          ? DateTime.tryParse(json['cached_at'].toString())
+          : null,
     );
   }
 
@@ -484,11 +498,15 @@ class Wine {
         if (communityReview != null) 'community_review': communityReview!.toJson(),
         if (winemakerNotes != null) 'winemaker_notes': winemakerNotes,
         if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+        if (cachedAt != null) 'cached_at': cachedAt!.toIso8601String(),
       };
 
   static String generateFingerprint(WineIdentity identity) {
-    final data =
-        '${identity.producer}|${identity.vintage}|${identity.region}'.toLowerCase();
+    // Normalize fields: trim whitespace and lowercase for consistent fingerprinting
+    final normalizedProducer = identity.producer.trim().toLowerCase();
+    final normalizedVintage = identity.vintage.trim().toLowerCase();
+    final normalizedRegion = identity.region.trim().toLowerCase();
+    final data = '$normalizedProducer|$normalizedVintage|$normalizedRegion';
     return md5.convert(utf8.encode(data)).toString();
   }
 
@@ -508,6 +526,7 @@ class Wine {
     CommunityReview? communityReview,
     String? winemakerNotes,
     DateTime? createdAt,
+    DateTime? cachedAt,
   }) {
     return Wine(
       id: id ?? this.id,
@@ -524,6 +543,7 @@ class Wine {
       communityReview: communityReview ?? this.communityReview,
       winemakerNotes: winemakerNotes ?? this.winemakerNotes,
       createdAt: createdAt ?? this.createdAt,
+      cachedAt: cachedAt ?? this.cachedAt,
     );
   }
 }
