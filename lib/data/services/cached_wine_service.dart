@@ -6,6 +6,17 @@ import '../models/wine_model.dart';
 import '../repositories/hive_database_helper.dart';
 import 'kimi_service.dart';
 
+/// Result of wine analysis containing the wine and cache status
+class WineAnalysisResult {
+  final Wine wine;
+  final bool wasFromCache;
+
+  const WineAnalysisResult({
+    required this.wine,
+    required this.wasFromCache,
+  });
+}
+
 /// Wine field completeness tracker
 /// Used to determine which fields need to be generated
 class WineFieldStatus {
@@ -115,7 +126,7 @@ class CachedWineService {
   /// 3. If found and complete: return cached wine
   /// 4. If found but incomplete: merge + generate missing fields
   /// 5. If not found: generate all fields via AI
-  Future<Wine> analyzeWine(
+  Future<WineAnalysisResult> analyzeWine(
     Uint8List imageBytes, {
     String? occupation,
     int? budget,
@@ -148,11 +159,11 @@ class CachedWineService {
       if (status.isComplete) {
         // Wine is complete, return from cache
         debugPrint('CachedWineService: Wine is complete, serving from cache');
-        return cachedWine;
+        return WineAnalysisResult(wine: cachedWine, wasFromCache: true);
       } else {
         // Wine exists but incomplete - generate missing fields
         debugPrint('CachedWineService: Wine incomplete. Missing: ${status.missingFields.join(', ')}');
-        return await _enhanceWine(
+        final enhancedWine = await _enhanceWine(
           cachedWine: cachedWine,
           imageBytes: imageBytes,
           missingFields: status.missingFields,
@@ -160,12 +171,13 @@ class CachedWineService {
           budget: budget,
           cuisine: cuisine,
         );
+        return WineAnalysisResult(wine: enhancedWine, wasFromCache: false);
       }
     }
     
     // Step 4: No cached wine or cache expired - generate all fields
     debugPrint('CachedWineService: Generating full wine content...');
-    return await _generateFullWine(
+    final newWine = await _generateFullWine(
       imageBytes: imageBytes,
       identity: identity,
       fingerprint: fingerprint,
@@ -173,6 +185,7 @@ class CachedWineService {
       budget: budget,
       cuisine: cuisine,
     );
+    return WineAnalysisResult(wine: newWine, wasFromCache: false);
   }
 
   /// Step 1: Get basic identity from AI (lightweight call)

@@ -45,30 +45,36 @@ class WineProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final wine = await _cachedWineService.analyzeWine(
+      final result = await _cachedWineService.analyzeWine(
         imageBytes,
         occupation: occupation,
         budget: budget,
         cuisine: cuisine,
       );
+      final wine = result.wine;
 
-      // Create search history entry only (wine already saved by CachedWineService)
-      try {
-        final faceEarned = SearchHistory.calculateFaceEarned(wine);
-        final history = SearchHistory(
-          wineId: wine.fingerprint,
-          wineFingerprint: wine.fingerprint,
-          wineName: wine.identity.fullName,
-          cuisineContext: cuisine ?? _selectedCuisine,
-          budgetContext: budget,
-          scannedAt: DateTime.now(),
-          faceEarned: faceEarned,
-        );
-        await _db.insertSearchHistory(history);
-        await _loadWineHistory();
-      } catch (dbError) {
-        debugPrint('Search history save skipped (web): $dbError');
-        // On web, just show results without saving history
+      // Only create search history entry if wine was NOT served from cache
+      // This prevents duplicate history entries when scanning the same wine
+      if (!result.wasFromCache) {
+        try {
+          final faceEarned = SearchHistory.calculateFaceEarned(wine);
+          final history = SearchHistory(
+            wineId: wine.fingerprint,
+            wineFingerprint: wine.fingerprint,
+            wineName: wine.identity.fullName,
+            cuisineContext: cuisine ?? _selectedCuisine,
+            budgetContext: budget,
+            scannedAt: DateTime.now(),
+            faceEarned: faceEarned,
+          );
+          await _db.insertSearchHistory(history);
+          await _loadWineHistory();
+        } catch (dbError) {
+          debugPrint('Search history save skipped (web): $dbError');
+          // On web, just show results without saving history
+        }
+      } else {
+        debugPrint('WineProvider: Wine served from cache, skipping history entry');
       }
 
       _currentWine = wine;
