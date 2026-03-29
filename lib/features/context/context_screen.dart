@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/language_provider.dart';
 import '../../ui/components/vivino_components.dart';
+import '../../core/constants/app_version.dart';
 
 class ContextScreen extends StatefulWidget {
   const ContextScreen({super.key});
@@ -109,6 +110,8 @@ class _ContextScreenState extends State<ContextScreen> {
                   const SizedBox(height: 32),
                   if (hasUser && !_isEditing) _buildProfileCard(user, l10n),
                   if (!hasUser || _isEditing) _buildEditForm(hasUser, l10n),
+                  const SizedBox(height: 32),
+                  _buildVersionInfo(),
                 ],
               ),
             ),
@@ -391,6 +394,35 @@ class _ContextScreenState extends State<ContextScreen> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildVersionInfo() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          const Divider(),
+          const SizedBox(height: 8),
+          Text(
+            'Wine AI ${AppVersion.fullVersion}',
+            style: const TextStyle(
+              fontSize: 12,
+              color: VivinoColors.textTertiary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Last updated: ${AppVersion.lastUpdated}',
+            style: const TextStyle(
+              fontSize: 10,
+              color: VivinoColors.textTertiary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
