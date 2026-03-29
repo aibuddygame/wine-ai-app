@@ -126,7 +126,7 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
         'exportTimestamp': DateTime.now().toIso8601String(),
         'exportVersion': '1.0',
         'database': {
-          'type': kIsWeb ? 'SQLite (Web/IndexedDB)' : 'SQLite (Native)',
+          'type': kIsWeb ? 'Hive (Web/IndexedDB)' : 'Hive (Native)',
           'platform': kIsWeb ? 'web' : 'native',
         },
         'summary': {
