@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../models/wine.dart';
 import '../models/cuisine_pairing.dart';
+import '../models/taste_profile.dart';
 import '../core/constants/app_constants.dart';
 
 class DatabaseService {

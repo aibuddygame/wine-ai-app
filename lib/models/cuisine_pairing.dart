@@ -43,8 +43,10 @@ class CuisinePairing {
     } else {
       social = const SocialSurvivalScript(
         theHook: BilingualText(zh: '', en: ''),
-        thePairingLogic: BilingualText(zh: '', en: ''),
-        theChitChat: BilingualText(zh: '', en: ''),
+        theGrape: BilingualText(zh: '', en: ''),
+        theRegion: BilingualText(zh: '', en: ''),
+        theVintage: BilingualText(zh: '', en: ''),
+        theTaste: BilingualText(zh: '', en: ''),
       );
     }
 
