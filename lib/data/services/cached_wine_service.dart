@@ -193,7 +193,7 @@ class CachedWineService {
     String? cuisine,
   }) async {
     debugPrint('CachedWineService: Generating full wine content via AI...');
-    
+
     // Generate complete wine via AI
     final wine = await _kimiService.analyzeWineImage(
       imageBytes,
@@ -202,10 +202,14 @@ class CachedWineService {
       cuisine: cuisine,
     );
 
-    // Ensure fingerprint is set and cache timestamp is recorded
+    // Encode image to base64 for storage
+    final base64Image = base64Encode(imageBytes);
+
+    // Ensure fingerprint is set, cache timestamp is recorded, and image is stored
     final completeWine = wine.copyWith(
       fingerprint: fingerprint,
       cachedAt: DateTime.now(),
+      scannedImageBase64: base64Image,
     );
 
     // Save to database
@@ -229,7 +233,7 @@ class CachedWineService {
     String? cuisine,
   }) async {
     debugPrint('CachedWineService: Enhancing wine with missing fields...');
-    
+
     // Generate only missing fields via AI
     // This uses the full prompt but we merge selectively
     final newWine = await _kimiService.analyzeWineImage(
@@ -239,13 +243,20 @@ class CachedWineService {
       cuisine: cuisine,
     );
 
+    // Encode image to base64 for storage (if not already present)
+    final base64Image = cachedWine.scannedImageBase64 ?? base64Encode(imageBytes);
+
     // Merge: Keep cached data, fill in missing fields from new data
     // Also update the cachedAt timestamp since we're refreshing the data
+    // Preserve or add the scanned image
     final enhancedWine = _mergeWines(
       cached: cachedWine,
       fresh: newWine,
       missingFields: missingFields,
-    ).copyWith(cachedAt: DateTime.now());
+    ).copyWith(
+      cachedAt: DateTime.now(),
+      scannedImageBase64: base64Image,
+    );
 
     // Save enhanced version back to database
     try {

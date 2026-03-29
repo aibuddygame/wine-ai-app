@@ -395,6 +395,7 @@ class Wine {
   final String? winemakerNotes;
   final DateTime? createdAt;
   final DateTime? cachedAt;
+  final String? scannedImageBase64;
 
   /// Cache expiration duration (30 days)
   static const Duration cacheExpiration = Duration(days: 30);
@@ -421,6 +422,7 @@ class Wine {
     this.winemakerNotes,
     this.createdAt,
     this.cachedAt,
+    this.scannedImageBase64,
   });
 
   factory Wine.fromJson(Map<String, dynamic> json) {
@@ -479,6 +481,7 @@ class Wine {
       cachedAt: json['cached_at'] != null
           ? DateTime.tryParse(json['cached_at'].toString())
           : null,
+      scannedImageBase64: json['scanned_image_base64'] as String?,
     );
   }
 
@@ -499,6 +502,7 @@ class Wine {
         if (winemakerNotes != null) 'winemaker_notes': winemakerNotes,
         if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
         if (cachedAt != null) 'cached_at': cachedAt!.toIso8601String(),
+        if (scannedImageBase64 != null) 'scanned_image_base64': scannedImageBase64,
       };
 
   static String generateFingerprint(WineIdentity identity) {
@@ -527,6 +531,7 @@ class Wine {
     String? winemakerNotes,
     DateTime? createdAt,
     DateTime? cachedAt,
+    String? scannedImageBase64,
   }) {
     return Wine(
       id: id ?? this.id,
@@ -544,6 +549,7 @@ class Wine {
       winemakerNotes: winemakerNotes ?? this.winemakerNotes,
       createdAt: createdAt ?? this.createdAt,
       cachedAt: cachedAt ?? this.cachedAt,
+      scannedImageBase64: scannedImageBase64 ?? this.scannedImageBase64,
     );
   }
 }

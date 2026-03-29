@@ -65,6 +65,7 @@ class ResultsScreen extends StatelessWidget {
                       Center(
                         child: VivinoWineHero(
                           imageUrl: null,
+                          base64Image: wine.scannedImageBase64,
                           rating: wine.benchmarks.criticScore?.toDouble() ?? 4.2,
                           ratingCount: wine.communityReview?.reviewCount ?? 2847,
                           ratingContext: l10n.ratingContext,

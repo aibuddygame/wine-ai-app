@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 // Vivino-inspired color palette (Light Theme)
@@ -282,6 +283,7 @@ class VivinoCuisineSelector extends StatelessWidget {
 // Vivino Wine Hero with Rating Badge - Updated to match mockup exactly
 class VivinoWineHero extends StatelessWidget {
   final String? imageUrl;
+  final String? base64Image;
   final double rating;
   final int ratingCount;
   final String? ratingContext;
@@ -289,6 +291,7 @@ class VivinoWineHero extends StatelessWidget {
   const VivinoWineHero({
     super.key,
     this.imageUrl,
+    this.base64Image,
     required this.rating,
     required this.ratingCount,
     this.ratingContext,
@@ -307,21 +310,7 @@ class VivinoWineHero extends StatelessWidget {
             color: VivinoColors.surfaceLight,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: imageUrl != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    imageUrl!,
-                    fit: BoxFit.contain,
-                  ),
-                )
-              : Center(
-                  child: Icon(
-                    Icons.wine_bar,
-                    size: 80,
-                    color: VivinoColors.primary.withOpacity(0.3),
-                  ),
-                ),
+          child: _buildImage(),
         ),
         // Rating badge - positioned bottom right as in mockup
         Positioned(
@@ -391,6 +380,42 @@ class VivinoWineHero extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildImage() {
+    // Priority: base64 image > network image > fallback icon
+    if (base64Image != null && base64Image!.isNotEmpty) {
+      try {
+        final bytes = base64Decode(base64Image!);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.contain,
+          ),
+        );
+      } catch (e) {
+        // Fall through to fallback if base64 decoding fails
+      }
+    }
+
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          imageUrl!,
+          fit: BoxFit.contain,
+        ),
+      );
+    }
+
+    return Center(
+      child: Icon(
+        Icons.wine_bar,
+        size: 80,
+        color: VivinoColors.primary.withOpacity(0.3),
+      ),
     );
   }
 }
