@@ -3,7 +3,6 @@ import 'dart:html' as html;
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import '../../data/repositories/database_helper.dart';
 import '../../data/repositories/hive_database_helper.dart';
 import '../../data/models/wine_model.dart';
 import '../../data/models/user_model.dart';
@@ -46,23 +45,18 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
     setState(() => _isLoading = true);
     
     try {
-      // Determine which database is being used
-      if (kIsWeb) {
-        _dbType = 'SQLite (Web/IndexedDB)';
-      } else {
-        _dbType = 'SQLite (Native)';
-      }
+      // The app uses HiveDatabaseHelper as the primary database
+      _dbType = kIsWeb ? 'Hive (Web/IndexedDB)' : 'Hive (Native)';
 
-      // Load from primary database
-      final dbHelper = DatabaseHelper();
+      // Load from Hive database (primary storage used by the app)
+      final dbHelper = HiveDatabaseHelper();
       _wines = await dbHelper.getAllWines();
       _searchHistory = await dbHelper.getSearchHistory(limit: 100);
       _user = await dbHelper.getUser();
       _vaultStats = await dbHelper.getVaultStats();
 
-      // Load Hive stats (backup/cache database)
-      final hiveHelper = HiveDatabaseHelper();
-      _hiveStats = await hiveHelper.getStats();
+      // Load Hive stats
+      _hiveStats = await dbHelper.getStats();
       
     } catch (e) {
       debugPrint('Error loading debug data: $e');
@@ -94,7 +88,6 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        await DatabaseHelper().clearAll();
         await HiveDatabaseHelper().clearAll();
         await _loadAllData();
         if (mounted) {
@@ -116,7 +109,7 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
     setState(() => _isLoading = true);
     
     try {
-      final dbHelper = DatabaseHelper();
+      final dbHelper = HiveDatabaseHelper();
       final wines = await dbHelper.getAllWines();
       final history = await dbHelper.getSearchHistory(limit: 1000);
       final user = await dbHelper.getUser();
@@ -198,7 +191,7 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
     setState(() => _isLoading = true);
     
     try {
-      final dbHelper = DatabaseHelper();
+      final dbHelper = HiveDatabaseHelper();
       final wines = await dbHelper.getAllWines();
       final history = await dbHelper.getSearchHistory(limit: 1000);
       final user = await dbHelper.getUser();
