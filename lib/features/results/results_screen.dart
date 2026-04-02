@@ -246,6 +246,8 @@ class ResultsScreen extends StatelessWidget {
                         child: PairingExplorer(
                           pairings: wine.pairings,
                           initialCuisine: _getInitialCuisine(wine.pairings),
+                          currentWine: wine,
+                          apiKey: wineProvider.hasApiKey ? wineProvider.apiKey : null,
                         ),
                       ),
 

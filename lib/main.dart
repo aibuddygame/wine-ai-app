@@ -40,8 +40,11 @@ class WineAIApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // API key from .env or --dart-define
-    final apiKey = dotenv.env['KIMI_API_KEY'] ??
-        const String.fromEnvironment('KIMI_API_KEY', defaultValue: '');
+    final apiKey = (dotenv.env['KIMI_API_KEY'] ??
+        const String.fromEnvironment('KIMI_API_KEY', defaultValue: '')).trim();
+    
+    debugPrint('WineAIApp: API Key length = ${apiKey.length}');
+    debugPrint('WineAIApp: API Key isEmpty = ${apiKey.isEmpty}');
 
     return MultiProvider(
       providers: [

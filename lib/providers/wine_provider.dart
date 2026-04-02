@@ -9,6 +9,7 @@ import '../data/services/kimi_service.dart';
 class WineProvider extends ChangeNotifier {
   final HiveDatabaseHelper _db = HiveDatabaseHelper();
   final CachedWineService _cachedWineService;
+  final String _apiKey;
 
   Wine? _currentWine;
   List<Wine> _wineHistory = [];
@@ -22,12 +23,14 @@ class WineProvider extends ChangeNotifier {
   String? get error => _error;
   String get selectedCuisine => _selectedCuisine;
   bool get hasApiKey => _cachedWineService.hasApiKey;
+  String get apiKey => _apiKey;
 
   DynamicPairing? get currentPairing =>
       _currentWine?.pairings[_selectedCuisine];
 
   WineProvider({required String apiKey})
-      : _cachedWineService = CachedWineService(apiKey: apiKey);
+      : _apiKey = apiKey,
+        _cachedWineService = CachedWineService(apiKey: apiKey);
 
   void setCuisine(String cuisine) {
     _selectedCuisine = cuisine;
