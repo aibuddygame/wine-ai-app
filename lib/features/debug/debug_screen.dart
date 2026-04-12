@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/repositories/hive_database_helper.dart';
@@ -152,17 +152,11 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
       final fileName = 'wine_ai_dump_${DateTime.now().millisecondsSinceEpoch}.json';
 
       if (kIsWeb) {
-        // Web: Download as file
-        final blob = html.Blob([jsonString], 'application/json');
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', fileName)
-          ..click();
-        html.Url.revokeObjectUrl(url);
-        
+        // Web: Download not supported in APK build
+        // Use the web version for this feature
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Database dump downloaded: $fileName')),
+            const SnackBar(content: Text('Web download not available in mobile app')),
           );
         }
       } else {
@@ -677,4 +671,6 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
       ),
     );
   }
+
+
 }

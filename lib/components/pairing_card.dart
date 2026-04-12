@@ -254,13 +254,13 @@ class PairingCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Padding(
-        padding: EdgeInsets.all(40),
+      child: Padding(
+        padding: const EdgeInsets.all(40),
         child: Center(
           child: Column(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
               Text(_isZh ? '正在獲得配對建議...' : 'Getting pairing advice...'),
             ],
           ),
