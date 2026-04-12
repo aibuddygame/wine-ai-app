@@ -81,6 +81,10 @@ class MenuAnalysisService {
     required String wineProfileJson,
     required Uint8List menuImageBytes,
   }) async {
+    if (apiKey.isEmpty) {
+      throw Exception('API key not configured');
+    }
+    
     final base64Image = base64Encode(menuImageBytes);
 
     final prompt = '''You are a wine pairing expert. Analyze this restaurant menu against the provided wine profile.
@@ -116,14 +120,13 @@ Rules:
 - Think about cooking methods, sauces, and dominant flavors''';
 
     final response = await http.post(
-      Uri.parse('https://api.moonshot.ai/v1/chat/completions'),
+      Uri.parse(AppConstants.kimiApiUrl),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $apiKey',
-        'Accept': 'application/json',
       },
       body: jsonEncode({
-        'model': 'moonshot-v1-8k-vision-preview',
+        'model': AppConstants.kimiModel,
         'messages': [
           {
             'role': 'user',
@@ -144,7 +147,9 @@ Rules:
     if (response.statusCode != 200) {
       debugPrint('Menu Analysis Error: Status ${response.statusCode}');
       debugPrint('Menu Analysis Error: Body ${response.body}');
-      throw Exception('Menu analysis failed: ${response.statusCode}');
+      debugPrint('Menu Analysis Error: API Key prefix = ${apiKey.substring(0, apiKey.length > 10 ? 10 : apiKey.length)}...');
+      debugPrint('Menu Analysis Error: API Key length = ${apiKey.length}');
+      throw Exception('Menu analysis failed: ${response.statusCode} - ${response.body}');
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
