@@ -82,14 +82,20 @@ class QuickPickOption {
   });
 }
 
-/// Predefined quick pick options
-final List<QuickPickOption> quickPickOptions = [
-  QuickPickOption(id: 'cantonese_seafood', label: 'Cantonese seafood', labelZh: '粵式海鮮'),
-  QuickPickOption(id: 'roast_meat', label: 'Roast meat', labelZh: '燒味'),
-  QuickPickOption(id: 'hotpot', label: 'Hotpot', labelZh: '火鍋'),
-  QuickPickOption(id: 'japanese', label: 'Japanese', labelZh: '日本料理'),
-  QuickPickOption(id: 'steak', label: 'Steak', labelZh: '牛排'),
-  QuickPickOption(id: 'western', label: 'Western', labelZh: '西餐'),
-  QuickPickOption(id: 'spicy_food', label: 'Spicy food', labelZh: '辛辣食物'),
-  QuickPickOption(id: 'dessert', label: 'Dessert', labelZh: '甜品'),
-];
+/// Get quick pick options based on locale
+List<QuickPickOption> getQuickPickOptions(String locale) {
+  final isZh = locale.startsWith('zh');
+  return [
+    QuickPickOption(id: 'cantonese_seafood', label: isZh ? '粵式海鮮' : 'Cantonese seafood', labelZh: '粵式海鮮'),
+    QuickPickOption(id: 'roast_meat', label: isZh ? '燒味' : 'Roast meat', labelZh: '燒味'),
+    QuickPickOption(id: 'hotpot', label: isZh ? '火鍋' : 'Hotpot', labelZh: '火鍋'),
+    QuickPickOption(id: 'japanese', label: isZh ? '日本料理' : 'Japanese', labelZh: '日本料理'),
+    QuickPickOption(id: 'steak', label: isZh ? '牛排' : 'Steak', labelZh: '牛排'),
+    QuickPickOption(id: 'western', label: isZh ? '西餐' : 'Western', labelZh: '西餐'),
+    QuickPickOption(id: 'spicy_food', label: isZh ? '辛辣食物' : 'Spicy food', labelZh: '辛辣食物'),
+    QuickPickOption(id: 'dessert', label: isZh ? '甜品' : 'Dessert', labelZh: '甜品'),
+  ];
+}
+
+/// Legacy export for backward compatibility
+final List<QuickPickOption> quickPickOptions = getQuickPickOptions('zh');

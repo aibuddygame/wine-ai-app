@@ -23,6 +23,7 @@ class PairingCard extends StatelessWidget {
   final Function(String) onDishSubmitted;
   final VoidCallback onCancel;
   final String? errorMessage;
+  final String locale;
 
   const PairingCard({
     Key? key,
@@ -34,7 +35,10 @@ class PairingCard extends StatelessWidget {
     required this.onDishSubmitted,
     required this.onCancel,
     this.errorMessage,
+    this.locale = 'zh',
   }) : super(key: key);
+
+  bool get _isZh => locale.startsWith('zh');
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +61,8 @@ class PairingCard extends StatelessWidget {
 
   /// Main pairing card with quick picks
   Widget _buildMainCard(BuildContext context) {
+    final options = getQuickPickOptions(locale);
+    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -68,7 +74,7 @@ class PairingCard extends StatelessWidget {
           children: [
             // Title
             Text(
-              'Match this bottle with tonight\'s meal',
+              _isZh ? '為今晚的餐點配對這瓶酒' : 'Match this bottle with tonight\'s meal',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -76,7 +82,9 @@ class PairingCard extends StatelessWidget {
             const SizedBox(height: 8),
             // Subtitle
             Text(
-              'Get pairing advice fast — tap a meal type, type a dish, or scan the menu.',
+              _isZh 
+                ? '快速獲得配對建議 — 點擊餐點類型、輸入菜名或掃描菜單' 
+                : 'Get pairing advice fast — tap a meal type, type a dish, or scan the menu.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -86,13 +94,13 @@ class PairingCard extends StatelessWidget {
             // Quick pick buttons - Row 1
             Row(
               children: [
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[0])),
+                Expanded(child: _buildQuickPickButton(context, options[0])),
                 const SizedBox(width: 8),
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[1])),
+                Expanded(child: _buildQuickPickButton(context, options[1])),
                 const SizedBox(width: 8),
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[2])),
+                Expanded(child: _buildQuickPickButton(context, options[2])),
                 const SizedBox(width: 8),
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[3])),
+                Expanded(child: _buildQuickPickButton(context, options[3])),
               ],
             ),
             const SizedBox(height: 8),
@@ -100,13 +108,13 @@ class PairingCard extends StatelessWidget {
             // Quick pick buttons - Row 2
             Row(
               children: [
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[4])),
+                Expanded(child: _buildQuickPickButton(context, options[4])),
                 const SizedBox(width: 8),
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[5])),
+                Expanded(child: _buildQuickPickButton(context, options[5])),
                 const SizedBox(width: 8),
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[6])),
+                Expanded(child: _buildQuickPickButton(context, options[6])),
                 const SizedBox(width: 8),
-                Expanded(child: _buildQuickPickButton(context, quickPickOptions[7])),
+                Expanded(child: _buildQuickPickButton(context, options[7])),
               ],
             ),
             const SizedBox(height: 20),
@@ -118,7 +126,7 @@ class PairingCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onTypeDish,
                     icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Type dish'),
+                    label: Text(_isZh ? '輸入菜名' : 'Type dish'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -129,7 +137,7 @@ class PairingCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onScanMenu,
                     icon: const Icon(Icons.camera_alt, size: 18),
-                    label: const Text('Scan menu'),
+                    label: Text(_isZh ? '掃描菜單' : 'Scan menu'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -144,7 +152,7 @@ class PairingCard extends StatelessWidget {
               width: double.infinity,
               child: TextButton(
                 onPressed: onSkip,
-                child: const Text('Skip for now'),
+                child: Text(_isZh ? '暫時跳過' : 'Skip for now'),
               ),
             ),
           ],
@@ -168,7 +176,7 @@ class PairingCard extends StatelessWidget {
         ),
       ),
       child: Text(
-        option.labelZh,
+        option.label,
         style: const TextStyle(fontSize: 12),
         textAlign: TextAlign.center,
         maxLines: 1,
@@ -198,7 +206,7 @@ class PairingCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    'Type your dish',
+                    _isZh ? '輸入你的菜名' : 'Type your dish',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -210,7 +218,9 @@ class PairingCard extends StatelessWidget {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: 'e.g., steamed garoupa, wagyu steak, lobster pasta',
+                hintText: _isZh 
+                  ? '例如：清蒸石斑、和牛牛排、龍蝦意粉' 
+                  : 'e.g., steamed garoupa, wagyu steak, lobster pasta',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -229,7 +239,7 @@ class PairingCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Get pairing advice'),
+                child: Text(_isZh ? '獲得配對建議' : 'Get pairing advice'),
               ),
             ),
           ],
@@ -251,7 +261,7 @@ class PairingCard extends StatelessWidget {
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Getting pairing advice...'),
+              Text(_isZh ? '正在獲得配對建議...' : 'Getting pairing advice...'),
             ],
           ),
         ),
@@ -272,13 +282,13 @@ class PairingCard extends StatelessWidget {
             const Icon(Icons.error_outline, color: Colors.red, size: 48),
             const SizedBox(height: 16),
             Text(
-              errorMessage ?? 'Couldn\'t generate pairing advice right now. Please try another meal type.',
+              errorMessage ?? (_isZh ? '暫時無法生成配對建議，請嘗試其他餐點類型' : 'Couldn\'t generate pairing advice right now. Please try another meal type.'),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onCancel,
-              child: const Text('Try again'),
+              child: Text(_isZh ? '重試' : 'Try again'),
             ),
           ],
         ),

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../models/pairing_models.dart';
-import '../constants/app_constants.dart';
+import '../core/constants/app_constants.dart';
 
 /// Service for generating wine pairing advice
 class PairingService {
@@ -100,7 +100,7 @@ Provide wine pairing advice in this exact JSON format:
   "confidence": 0.85
 }
 
-Keep it concise and practical for a business dinner context.'';
+Keep it concise and practical for a business dinner context.''';
   }
 
   /// Get mock pairing result for MVP

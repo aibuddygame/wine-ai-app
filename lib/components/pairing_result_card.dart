@@ -8,6 +8,7 @@ class PairingResultCard extends StatelessWidget {
   final VoidCallback onTryAnother;
   final VoidCallback onSave;
   final VoidCallback onShare;
+  final String locale;
 
   const PairingResultCard({
     Key? key,
@@ -16,7 +17,10 @@ class PairingResultCard extends StatelessWidget {
     required this.onTryAnother,
     required this.onSave,
     required this.onShare,
+    this.locale = 'zh',
   }) : super(key: key);
+
+  bool get _isZh => locale.startsWith('zh');
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +38,9 @@ class PairingResultCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    isFallback ? 'General pairing' : 'Pairing advice',
+                    isFallback 
+                      ? (_isZh ? '一般配對' : 'General pairing')
+                      : (_isZh ? '配對建議' : 'Pairing advice'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -49,7 +55,7 @@ class PairingResultCard extends StatelessWidget {
             _buildInfoRow(
               context,
               icon: Icons.restaurant,
-              label: 'Best with',
+              label: _isZh ? '最適合' : 'Best with',
               value: result.bestWith.join(', '),
             ),
             const SizedBox(height: 16),
@@ -58,7 +64,7 @@ class PairingResultCard extends StatelessWidget {
             _buildInfoRow(
               context,
               icon: Icons.lightbulb_outline,
-              label: 'Why',
+              label: _isZh ? '原因' : 'Why',
               value: result.why,
             ),
             const SizedBox(height: 16),
@@ -67,7 +73,7 @@ class PairingResultCard extends StatelessWidget {
             _buildInfoRow(
               context,
               icon: Icons.chat_bubble_outline,
-              label: 'Say this',
+              label: _isZh ? '可以這樣說' : 'Say this',
               value: '"${result.sayThis}"',
               isQuote: true,
             ),
@@ -78,7 +84,7 @@ class PairingResultCard extends StatelessWidget {
               _buildInfoRow(
                 context,
                 icon: Icons.block,
-                label: 'Less suitable for',
+                label: _isZh ? '較不適合' : 'Less suitable for',
                 value: result.lessSuitableFor.join(', '),
                 valueColor: Colors.orange[700],
               ),
@@ -95,18 +101,18 @@ class PairingResultCard extends StatelessWidget {
                   child: TextButton.icon(
                     onPressed: onTryAnother,
                     icon: const Icon(Icons.refresh, size: 18),
-                    label: const Text('Try another dish'),
+                    label: Text(_isZh ? '嘗試其他菜式' : 'Try another dish'),
                   ),
                 ),
                 IconButton(
                   onPressed: onSave,
                   icon: const Icon(Icons.bookmark_border),
-                  tooltip: 'Save',
+                  tooltip: _isZh ? '保存' : 'Save',
                 ),
                 IconButton(
                   onPressed: onShare,
                   icon: const Icon(Icons.share),
-                  tooltip: 'Share',
+                  tooltip: _isZh ? '分享' : 'Share',
                 ),
               ],
             ),
@@ -207,11 +213,15 @@ class PairingResultCard extends StatelessWidget {
 /// Fallback pairing result card (when user skips)
 class FallbackPairingCard extends StatelessWidget {
   final VoidCallback onAddMeal;
+  final String locale;
 
   const FallbackPairingCard({
     Key? key,
     required this.onAddMeal,
+    this.locale = 'zh',
   }) : super(key: key);
+
+  bool get _isZh => locale.startsWith('zh');
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +235,7 @@ class FallbackPairingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'General pairing',
+              _isZh ? '一般配對' : 'General pairing',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -236,8 +246,8 @@ class FallbackPairingCard extends StatelessWidget {
             _buildInfoRow(
               context,
               icon: Icons.restaurant,
-              label: 'Best with',
-              value: 'Seafood, poultry, creamy dishes',
+              label: _isZh ? '最適合' : 'Best with',
+              value: _isZh ? '海鮮、家禽、奶油菜式' : 'Seafood, poultry, creamy dishes',
             ),
             const SizedBox(height: 12),
             
@@ -245,8 +255,8 @@ class FallbackPairingCard extends StatelessWidget {
             _buildInfoRow(
               context,
               icon: Icons.block,
-              label: 'Less suitable for',
-              value: 'Spicy hotpot, sweet desserts',
+              label: _isZh ? '較不適合' : 'Less suitable for',
+              value: _isZh ? '辛辣火鍋、甜點' : 'Spicy hotpot, sweet desserts',
               valueColor: Colors.orange[700],
             ),
             const SizedBox(height: 12),
@@ -255,8 +265,10 @@ class FallbackPairingCard extends StatelessWidget {
             _buildInfoRow(
               context,
               icon: Icons.chat_bubble_outline,
-              label: 'Talking point',
-              value: '"This is a safer choice for lighter dishes rather than heavily spiced food."',
+              label: _isZh ? '談話要點' : 'Talking point',
+              value: _isZh 
+                ? '"這是清淡菜式的安全選擇，而不是重辛辣的食物。"'
+                : '"This is a safer choice for lighter dishes rather than heavily spiced food."',
               isQuote: true,
             ),
             
@@ -266,7 +278,7 @@ class FallbackPairingCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onAddMeal,
                 icon: const Icon(Icons.add),
-                label: const Text('Add tonight\'s meal for better advice'),
+                label: Text(_isZh ? '添加今晚的餐點以獲得更好建議' : 'Add tonight\'s meal for better advice'),
               ),
             ),
           ],

@@ -30,8 +30,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     try {
       final service = PairingService(apiKey: ''); // Uses mock data for MVP
       final request = PairingRequest(
-        wineId: wine.identity.name,
-        wineName: wine.identity.name,
+        wineId: wine.identity.fullName,
+        wineName: wine.identity.fullName,
         mealInputType: type,
         mealValue: value,
         locale: 'zh-HK',
@@ -298,18 +298,20 @@ class _ResultsScreenState extends State<ResultsScreen> {
                           onTryAnother: _resetPairing,
                           onSave: () {},
                           onShare: () {},
+                          locale: l10n.localeName,
                         )
                       else if (_pairingState == PairingCardState.fallback)
                         FallbackPairingCard(
                           onAddMeal: _resetPairing,
+                          locale: l10n.localeName,
                         )
                       else
                         PairingCard(
                           state: _pairingState,
                           onQuickPickSelected: (mealType) {
-                            final option = quickPickOptions.firstWhere(
+                            final option = getQuickPickOptions(l10n.localeName).firstWhere(
                               (o) => o.id == mealType,
-                              orElse: () => quickPickOptions[0],
+                              orElse: () => getQuickPickOptions(l10n.localeName)[0],
                             );
                             _generatePairing(wine, MealInputType.quickPick, option.label);
                           },
@@ -334,6 +336,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                           },
                           onCancel: _resetPairing,
                           errorMessage: _errorMessage,
+                          locale: l10n.localeName,
                         ),
 
                       const SizedBox(height: 32),
