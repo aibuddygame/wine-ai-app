@@ -4,10 +4,60 @@ import '../../data/models/wine_model.dart';
 import '../../providers/wine_provider.dart';
 import '../../ui/components/vivino_components.dart';
 import '../../l10n/app_localizations.dart';
-import 'pairing_explorer.dart';
+import '../../components/pairing_card.dart';
+import '../../components/pairing_result_card.dart';
+import '../../models/pairing_models.dart';
+import '../../services/pairing_service.dart';
 
-class ResultsScreen extends StatelessWidget {
+class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
+
+  @override
+  State<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  PairingCardState _pairingState = PairingCardState.idle;
+  PairingResult? _pairingResult;
+  String? _errorMessage;
+
+  Future<void> _generatePairing(Wine wine, MealInputType type, String value) async {
+    setState(() {
+      _pairingState = PairingCardState.loading;
+      _errorMessage = null;
+    });
+
+    try {
+      final service = PairingService(apiKey: ''); // Uses mock data for MVP
+      final request = PairingRequest(
+        wineId: wine.identity.name,
+        wineName: wine.identity.name,
+        mealInputType: type,
+        mealValue: value,
+        locale: 'zh-HK',
+      );
+
+      final result = await service.generatePairing(request);
+
+      setState(() {
+        _pairingResult = result;
+        _pairingState = PairingCardState.success;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _pairingState = PairingCardState.error;
+      });
+    }
+  }
+
+  void _resetPairing() {
+    setState(() {
+      _pairingState = PairingCardState.idle;
+      _pairingResult = null;
+      _errorMessage = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -240,16 +290,51 @@ class ResultsScreen extends StatelessWidget {
                         const SizedBox(height: 32),
                       ],
 
-                      // 8. PAIRING EXPLORER - Interactive Cuisine Tabs
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: PairingExplorer(
-                          pairings: wine.pairings,
-                          initialCuisine: _getInitialCuisine(wine.pairings),
-                          currentWine: wine,
-                          apiKey: wineProvider.hasApiKey ? wineProvider.apiKey : null,
+                      // 8. PAIRING CARD - New lightweight pairing flow
+                      if (_pairingState == PairingCardState.success && _pairingResult != null)
+                        PairingResultCard(
+                          result: _pairingResult!,
+                          isFallback: false,
+                          onTryAnother: _resetPairing,
+                          onSave: () {},
+                          onShare: () {},
+                        )
+                      else if (_pairingState == PairingCardState.fallback)
+                        FallbackPairingCard(
+                          onAddMeal: _resetPairing,
+                        )
+                      else
+                        PairingCard(
+                          state: _pairingState,
+                          onQuickPickSelected: (mealType) {
+                            final option = quickPickOptions.firstWhere(
+                              (o) => o.id == mealType,
+                              orElse: () => quickPickOptions[0],
+                            );
+                            _generatePairing(wine, MealInputType.quickPick, option.label);
+                          },
+                          onTypeDish: () {
+                            setState(() {
+                              _pairingState = PairingCardState.typingDish;
+                            });
+                          },
+                          onScanMenu: () {
+                            // MVP: Show fallback for now
+                            setState(() {
+                              _pairingState = PairingCardState.fallback;
+                            });
+                          },
+                          onSkip: () {
+                            setState(() {
+                              _pairingState = PairingCardState.fallback;
+                            });
+                          },
+                          onDishSubmitted: (dish) {
+                            _generatePairing(wine, MealInputType.typedDish, dish);
+                          },
+                          onCancel: _resetPairing,
+                          errorMessage: _errorMessage,
                         ),
-                      ),
 
                       const SizedBox(height: 32),
 
