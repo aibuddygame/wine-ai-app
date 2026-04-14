@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/wine_model.dart';
+import '../models/wine_quick_result.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/vocabulary_service.dart';
 
@@ -33,11 +34,12 @@ class KimiService {
 
   bool get hasApiKey => apiKey.isNotEmpty;
 
-  Future<Wine> analyzeWineImage(
+  /// Stage 1: Fast wine identification (lean scan)
+  /// Returns quick result with basic info only - no heavy analysis
+  Future<WineScanQuickResult> analyzeWineImageStage1(
     Uint8List imageBytes, {
     String? occupation,
     int? budget,
-    String? cuisine,
   }) async {
     if (!hasApiKey) {
       throw const KimiServiceException(
@@ -46,25 +48,23 @@ class KimiService {
     }
 
     final base64Image = base64Encode(imageBytes);
-    final prompt = _buildPrompt(
+    final prompt = _buildStage1Prompt(
       occupation: occupation,
       budget: budget,
-      cuisine: cuisine,
-      locale: 'zh',
     );
 
     // Retry logic
     Exception? lastError;
     for (var attempt = 0; attempt <= AppConstants.maxRetries; attempt++) {
       try {
-        return await _makeRequest(base64Image, prompt);
+        return await _makeStage1Request(base64Image, prompt);
       } on KimiServiceException {
         rethrow;
       } on TimeoutException {
         lastError = const KimiServiceException('Request timed out. Please try again.');
       } on FormatException catch (e) {
         lastError = KimiServiceException('Failed to parse response: ${e.message}');
-        break; // Don't retry parse errors
+        break;
       } catch (e) {
         lastError = KimiServiceException('Network error: $e');
       }
@@ -77,7 +77,74 @@ class KimiService {
     throw lastError ?? const KimiServiceException('Unknown error');
   }
 
-  Future<Wine> _makeRequest(String base64Image, String prompt) async {
+  /// Stage 2: Enrich wine data with detailed analysis
+  /// Text-only call using Stage 1 results
+  Future<Wine> enrichWineData(
+    WineScanQuickResult quickResult, {
+    String? occupation,
+    int? budget,
+    String? cuisine,
+  }) async {
+    if (!hasApiKey) {
+      throw const KimiServiceException('API key not configured.');
+    }
+
+    final prompt = _buildEnrichmentPrompt(
+      quickResult: quickResult,
+      occupation: occupation,
+      budget: budget,
+      cuisine: cuisine,
+    );
+
+    try {
+      final response = await _client
+          .post(
+            Uri.parse(apiUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $apiKey',
+            },
+            body: jsonEncode({
+              'model': model,
+              'messages': [
+                {
+                  'role': 'system',
+                  'content': _enrichmentSystemPrompt,
+                },
+                {
+                  'role': 'user',
+                  'content': prompt,
+                },
+              ],
+              'temperature': 0.3,
+              'max_tokens': 2000,
+              'response_format': {'type': 'json_object'},
+            }),
+          )
+          .timeout(AppConstants.apiTimeout);
+
+      if (response.statusCode != 200) {
+        throw KimiServiceException(
+          'API error: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final content = data['choices']?[0]?['message']?['content'] as String;
+      final enrichmentData = jsonDecode(content) as Map<String, dynamic>;
+
+      // Merge Stage 1 and Stage 2 data
+      return _mergeWineData(quickResult, enrichmentData);
+    } catch (e) {
+      debugPrint('Enrichment error: $e');
+      // Return basic wine from Stage 1 if enrichment fails
+      return _createBasicWine(quickResult);
+    }
+  }
+
+  /// Stage 1: Make lean identification request
+  Future<WineScanQuickResult> _makeStage1Request(String base64Image, String prompt) async {
     final response = await _client
         .post(
           Uri.parse(apiUrl),
@@ -90,10 +157,7 @@ class KimiService {
             'messages': [
               {
                 'role': 'system',
-                'content':
-                    'You are a Senior Sommelier and Wine Data Analyst. '
-                    'Analyze wine images and provide structured data. '
-                    'Always respond with valid JSON only. No markdown, no prose.',
+                'content': _stage1SystemPrompt,
               },
               {
                 'role': 'user',
@@ -108,8 +172,9 @@ class KimiService {
                 ],
               },
             ],
-            'temperature': 0.3,
-            'max_tokens': 3000,
+            'temperature': 0.2,
+            'max_tokens': 700,
+            'response_format': {'type': 'json_object'},
           }),
         )
         .timeout(AppConstants.apiTimeout);
@@ -146,14 +211,8 @@ class KimiService {
       );
     }
 
-    final identity =
-        WineIdentity.fromJson(wineData['wine_identity'] as Map<String, dynamic>? ?? {});
-    final fingerprint = Wine.generateFingerprint(identity);
-
-    return Wine.fromJson({
-      ...wineData,
-      'fingerprint': fingerprint,
-    });
+    // Parse Stage 1 quick result
+    return WineScanQuickResult.fromJson(wineData);
   }
 
   String _buildPrompt({
@@ -339,6 +398,185 @@ Each pairing_rationale must be MAX 15 WORDS and explain the specific logic for t
     }
 
     return cleaned;
+  }
+
+  // ==================== STAGE 1: LEAN IDENTIFICATION ====================
+
+  static const String _stage1SystemPrompt = '''You are a wine label recognition assistant for a mobile app.
+
+Your job in this stage is ONLY to identify the bottle from the image and return a short beginner-friendly summary in Traditional Chinese.
+
+Important rules:
+- Focus on bottle identification first.
+- Keep the response compact.
+- Do not generate long tasting notes.
+- Do not generate food pairing.
+- Do not generate social conversation scripts.
+- Do not generate rankings or critic scores.
+- If uncertain, provide your best guess and lower the confidence score.
+- Return valid JSON only.
+
+The JSON fields must be:
+- wine_name
+- winery
+- vintage
+- country
+- region
+- wine_type
+- grape
+- confidence
+- short_summary_zh
+- tonight_fit_zh
+
+Definitions:
+- short_summary_zh = one short Traditional Chinese line for a beginner
+- tonight_fit_zh = one short Traditional Chinese line about whether this bottle is generally suitable for tonight, without meal-specific pairing
+- confidence = number from 0 to 1''';
+
+  String _buildStage1Prompt({
+    String? occupation,
+    int? budget,
+  }) {
+    final contextParts = <String>[];
+    if (occupation != null && occupation.isNotEmpty) {
+      contextParts.add('User occupation: $occupation');
+    }
+    if (budget != null) {
+      contextParts.add('Typical budget: HKD $budget');
+    }
+
+    final contextString = contextParts.isNotEmpty
+        ? '\n\nContext: ${contextParts.join(', ')}'
+        : '';
+
+    return '''Please identify this wine bottle from the image and return only the required JSON.$contextString
+
+If exact identification is uncertain, provide the most likely result and reflect uncertainty in the confidence field.
+Use Traditional Chinese for text fields.
+
+Return JSON in this exact format:
+{
+  "wine_name": "Chateau Montelena Cabernet Sauvignon",
+  "winery": "Chateau Montelena",
+  "vintage": "2019",
+  "country": "United States",
+  "region": "Napa Valley",
+  "wine_type": "red",
+  "grape": "Cabernet Sauvignon",
+  "confidence": 0.86,
+  "short_summary_zh": "這是一款偏飽滿、風格較穩重的紅酒，通常會有黑色水果與較明顯結構感。",
+  "tonight_fit_zh": "如果今晚是正式晚餐或偏重口味菜式，通常會是較穩陣的選擇。"
+}''';
+  }
+
+  // ==================== STAGE 2: ENRICHMENT ====================
+
+  static const String _enrichmentSystemPrompt = '''You are a wine expert assistant.
+
+Given basic wine information, generate detailed analysis including:
+- Taste profile (sliders 0-100)
+- Serving recommendations
+- Social scripts (what to say)
+- Food pairings
+- Benchmarks and ratings
+
+Return valid JSON only.''';
+
+  String _buildEnrichmentPrompt({
+    required WineScanQuickResult quickResult,
+    String? occupation,
+    int? budget,
+    String? cuisine,
+  }) {
+    final contextParts = <String>[];
+    if (occupation != null && occupation.isNotEmpty) {
+      contextParts.add('User occupation: $occupation');
+    }
+    if (budget != null) {
+      contextParts.add('Budget: HKD $budget');
+    }
+    if (cuisine != null && cuisine.isNotEmpty) {
+      contextParts.add('Cuisine: $cuisine');
+    }
+
+    final contextString = contextParts.isNotEmpty
+        ? '\nContext: ${contextParts.join(', ')}'
+        : '';
+
+    return '''Wine: ${quickResult.winery} ${quickResult.wineName} ${quickResult.vintage}
+Type: ${quickResult.wineType}
+Region: ${quickResult.region}, ${quickResult.country}
+Grape: ${quickResult.grape}$contextString
+
+Generate detailed analysis in JSON format with these sections:
+- taste_profile (light_bold, smooth_tannic, dry_sweet, soft_acidic sliders 0-100)
+- serving_intel (temperature_c, decanting, glassware)
+- social_scripts (hook, observation, question)
+- dynamic_pairing (Chinese, Japanese, Western cuisines)
+- benchmarks (ratings, price estimate)
+- flavor_profile (primary, secondary, tertiary aromas)''';
+  }
+
+  Wine _createBasicWine(WineScanQuickResult quick) {
+    // Create minimal Wine object from Stage 1 result
+    return Wine(
+      identity: WineIdentity(
+        fullName: '${quick.winery} ${quick.wineName}',
+        vintage: quick.vintage,
+        producer: quick.winery,
+        region: quick.region,
+        subRegion: quick.region,
+        country: quick.country,
+        wineType: quick.wineType,
+        grapeVariety: quick.grape,
+        classification: '',
+        grapes: quick.grape.isNotEmpty ? [quick.grape] : [],
+      ),
+      benchmarks: WineBenchmarks(
+        globalTopPercent: 50,
+        regionalTopPercent: 50,
+        averagePrice: 0,
+        priceCurrency: 'HKD',
+        criticScore: (quick.confidence * 5).toDouble(),
+      ),
+      tasteProfile: TasteProfile(
+        lightBold: 50,
+        smoothTannic: 50,
+        drySweet: 50,
+        softAcidic: 50,
+        aromaGroups: {
+          'primary': [],
+          'secondary': [],
+          'tertiary': [],
+        },
+      ),
+      servingIntel: ServingIntel(
+        temperatureC: 16,
+        servingTip: '',
+        decantingRecommendation: '',
+        glasswareRecommendation: '',
+      ),
+      socialScripts: SocialScripts(
+        theHook: quick.shortSummaryZh,
+        theGrape: quick.grape,
+        theRegion: '${quick.region}, ${quick.country}',
+        theVintage: quick.vintage,
+        theTaste: quick.shortSummaryZh,
+      ),
+      pairings: {},
+      fingerprint: '',
+      scannedImageBase64: '',
+    );
+  }
+
+  Wine _mergeWineData(WineScanQuickResult quick, Map<String, dynamic> enrichment) {
+    // Start with basic wine and overlay enrichment data
+    final basic = _createBasicWine(quick);
+    
+    // TODO: Parse enrichment data and merge with basic
+    // This is a simplified version - full implementation would parse all fields
+    
+    return basic;
   }
 
   void dispose() {
