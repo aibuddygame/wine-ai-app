@@ -211,14 +211,8 @@ class KimiService {
       );
     }
 
-    final identity =
-        WineIdentity.fromJson(wineData['wine_identity'] as Map<String, dynamic>? ?? {});
-    final fingerprint = Wine.generateFingerprint(identity);
-
-    return Wine.fromJson({
-      ...wineData,
-      'fingerprint': fingerprint,
-    });
+    // Parse Stage 1 quick result
+    return WineScanQuickResult.fromJson(wineData);
   }
 
   String _buildPrompt({
@@ -536,24 +530,25 @@ Generate detailed analysis in JSON format with these sections:
         wineType: quick.wineType,
         grapeVariety: quick.grape,
         classification: '',
+        grapes: quick.grape.isNotEmpty ? [quick.grape] : [],
       ),
       benchmarks: WineBenchmarks(
         globalTopPercent: 50,
         regionalTopPercent: 50,
         averagePrice: 0,
         priceCurrency: 'HKD',
-        criticScore: (quick.confidence * 5).round(),
+        criticScore: (quick.confidence * 5).toDouble(),
       ),
-      tasteProfile: WineTasteProfile(
+      tasteProfile: TasteProfile(
         lightBold: 50,
         smoothTannic: 50,
         drySweet: 50,
         softAcidic: 50,
-        aromaGroups: AromaGroups(
-          primary: [],
-          secondary: [],
-          tertiary: [],
-        ),
+        aromaGroups: {
+          'primary': [],
+          'secondary': [],
+          'tertiary': [],
+        },
       ),
       servingIntel: ServingIntel(
         temperatureC: 16,
@@ -563,28 +558,12 @@ Generate detailed analysis in JSON format with these sections:
       ),
       socialScripts: SocialScripts(
         theHook: quick.shortSummaryZh,
-        theObservation: '',
-        theQuestion: '',
+        theGrape: quick.grape,
+        theRegion: '${quick.region}, ${quick.country}',
+        theVintage: quick.vintage,
+        theTaste: quick.shortSummaryZh,
       ),
-      regionStyle: RegionStyle(
-        description: '',
-        climate: '',
-        typicalProfile: '',
-      ),
-      grapeEducation: [],
-      flavorProfile: FlavorProfile(
-        primary: [],
-        secondary: [],
-        tertiary: [],
-        communityQuotes: [],
-      ),
-      communityReview: CommunityReview(
-        rating: quick.confidence * 5,
-        reviewText: quick.tonightFitZh,
-        source: 'AI Analysis',
-        reviewCount: 1,
-      ),
-      dynamicPairing: {},
+      pairings: {},
       fingerprint: '',
       scannedImageBase64: '',
     );
