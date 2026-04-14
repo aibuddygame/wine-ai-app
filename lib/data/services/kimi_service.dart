@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/wine_model.dart';
 import '../../core/constants/app_constants.dart';
+import '../../services/vocabulary_service.dart';
 
 class KimiServiceException implements Exception {
   final String message;
@@ -49,6 +50,7 @@ class KimiService {
       occupation: occupation,
       budget: budget,
       cuisine: cuisine,
+      locale: 'zh',
     );
 
     // Retry logic
@@ -158,6 +160,7 @@ class KimiService {
     String? occupation,
     int? budget,
     String? cuisine,
+    String locale = 'zh',
   }) {
     final contextParts = <String>[];
     if (occupation != null && occupation.isNotEmpty) {
@@ -174,7 +177,14 @@ class KimiService {
         ? '\n\nUser Context:\n${contextParts.join('\n')}'
         : '';
 
+    // Get vocabulary instructions
+    final vocabService = VocabularyService();
+    vocabService.setLocale(locale);
+    final vocabInstructions = vocabService.generatePromptInstructions();
+
     return '''Analyze this wine image and provide detailed information in STRICT JSON format.$contextString
+
+$vocabInstructions
 
 Respond ONLY with a JSON object matching this exact structure:
 
