@@ -514,6 +514,29 @@ class Wine {
     return md5.convert(utf8.encode(data)).toString();
   }
 
+  /// Generate fingerprint from quick scan result
+  static String generateFingerprintFromQuick(dynamic quickResult) {
+    // Handle both WineScanQuickResult and WineIdentity
+    String producer, vintage, region;
+    
+    if (quickResult is WineIdentity) {
+      producer = quickResult.producer;
+      vintage = quickResult.vintage;
+      region = quickResult.region;
+    } else {
+      // Assume it's a QuickResult-like object with these fields
+      producer = (quickResult as dynamic).winery ?? '';
+      vintage = (quickResult as dynamic).vintage ?? '';
+      region = (quickResult as dynamic).region ?? '';
+    }
+    
+    final normalizedProducer = producer.trim().toLowerCase();
+    final normalizedVintage = vintage.trim().toLowerCase();
+    final normalizedRegion = region.trim().toLowerCase();
+    final data = '$normalizedProducer|$normalizedVintage|$normalizedRegion';
+    return md5.convert(utf8.encode(data)).toString();
+  }
+
   /// Create a copy of this wine with optional field overrides
   Wine copyWith({
     String? id,

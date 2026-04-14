@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import '../models/wine_model.dart';
+import '../models/wine_quick_result.dart';
 import '../repositories/hive_database_helper.dart';
 import 'kimi_service.dart';
 
@@ -118,19 +119,12 @@ class CachedWineService {
 
   bool get hasApiKey => _kimiService.hasApiKey;
 
-  /// Main entry point: Analyze wine with smart caching
-  /// 
-  /// Flow:
-  /// 1. Generate fingerprint from image (via AI identity detection)
-  /// 2. Check database for existing wine
-  /// 3. If found and complete: return cached wine
-  /// 4. If found but incomplete: merge + generate missing fields
-  /// 5. If not found: generate all fields via AI
-  Future<WineAnalysisResult> analyzeWine(
+  /// Stage 1: Fast wine identification (lean scan)
+  /// Returns quick result immediately - no heavy analysis
+  Future<WineScanQuickResult> analyzeWineStage1(
     Uint8List imageBytes, {
     String? occupation,
     int? budget,
-    String? cuisine,
   }) async {
     if (!hasApiKey) {
       throw const KimiServiceException(
@@ -138,54 +132,71 @@ class CachedWineService {
       );
     }
 
-    // Step 1: Get basic identity from AI (needed for fingerprint)
-    // This is a lightweight call to get producer + name + vintage
-    debugPrint('CachedWineService: Getting wine identity from AI...');
-    final identity = await _getWineIdentity(imageBytes);
-    final fingerprint = Wine.generateFingerprint(identity);
-    
-    debugPrint('CachedWineService: Generated fingerprint: $fingerprint');
+    debugPrint('CachedWineService: Stage 1 - Fast identification...');
+    return await _kimiService.analyzeWineImageStage1(
+      imageBytes,
+      occupation: occupation,
+      budget: budget,
+    );
+  }
 
-    // Step 2: Check database for existing wine
-    final cachedWine = await _db.getWineByFingerprint(fingerprint);
-    
-    if (cachedWine != null && !cachedWine.isCacheExpired) {
-      debugPrint('CachedWineService: Found wine in database (not expired)');
-      
-      // Step 3: Check completeness
-      final status = WineFieldStatus.fromWine(cachedWine);
-      debugPrint('CachedWineService: Wine completeness: ${status.completenessPercentage}%');
-      
-      if (status.isComplete) {
-        // Wine is complete, return from cache
-        debugPrint('CachedWineService: Wine is complete, serving from cache');
-        return WineAnalysisResult(wine: cachedWine, wasFromCache: true);
-      } else {
-        // Wine exists but incomplete - generate missing fields
-        debugPrint('CachedWineService: Wine incomplete. Missing: ${status.missingFields.join(', ')}');
-        final enhancedWine = await _enhanceWine(
-          cachedWine: cachedWine,
-          imageBytes: imageBytes,
-          missingFields: status.missingFields,
-          occupation: occupation,
-          budget: budget,
-          cuisine: cuisine,
-        );
-        return WineAnalysisResult(wine: enhancedWine, wasFromCache: false);
-      }
-    }
-    
-    // Step 4: No cached wine or cache expired - generate all fields
-    debugPrint('CachedWineService: Generating full wine content...');
-    final newWine = await _generateFullWine(
-      imageBytes: imageBytes,
-      identity: identity,
-      fingerprint: fingerprint,
+  /// Stage 2: Enrich wine data with detailed analysis
+  /// Called after Stage 1 result is displayed
+  Future<Wine> enrichWineData(
+    WineScanQuickResult quickResult, {
+    String? occupation,
+    int? budget,
+    String? cuisine,
+  }) async {
+    debugPrint('CachedWineService: Stage 2 - Enriching wine data...');
+    return await _kimiService.enrichWineData(
+      quickResult,
       occupation: occupation,
       budget: budget,
       cuisine: cuisine,
     );
-    return WineAnalysisResult(wine: newWine, wasFromCache: false);
+  }
+
+  /// Legacy method - kept for compatibility
+  /// Uses new Stage 1 + Stage 2 flow internally
+  Future<WineAnalysisResult> analyzeWine(
+    Uint8List imageBytes, {
+    String? occupation,
+    int? budget,
+    String? cuisine,
+  }) async {
+    // Stage 1: Fast identification
+    final quickResult = await analyzeWineStage1(
+      imageBytes,
+      occupation: occupation,
+      budget: budget,
+    );
+
+    // Check cache using fingerprint from quick result
+    final fingerprint = Wine.generateFingerprintFromQuick(quickResult);
+    final cachedWine = await _db.getWineByFingerprint(fingerprint);
+    
+    if (cachedWine != null && !cachedWine.isCacheExpired) {
+      debugPrint('CachedWineService: Found complete wine in cache');
+      return WineAnalysisResult(wine: cachedWine, wasFromCache: true);
+    }
+
+    // Stage 2: Enrich with detailed analysis
+    final wine = await enrichWineData(
+      quickResult,
+      occupation: occupation,
+      budget: budget,
+      cuisine: cuisine,
+    );
+
+    // Save to database
+    try {
+      await _db.insertWine(wine);
+    } catch (e) {
+      debugPrint('Failed to save wine to database: $e');
+    }
+
+    return WineAnalysisResult(wine: wine, wasFromCache: false);
   }
 
   /// Step 1: Get basic identity from AI (lightweight call)
