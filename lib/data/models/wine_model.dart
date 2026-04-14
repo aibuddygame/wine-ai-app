@@ -37,7 +37,8 @@ class WineIdentity {
       classification: (json['classification'] as String?) ?? '',
       wineType: (json['wine_type'] as String?) ?? 'Red wine',
       grapeVariety: (json['grape_variety'] as String?) ?? '',
-      grapes: (json['grapes'] as List<dynamic>?)
+      grapes:
+          (json['grapes'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -45,17 +46,17 @@ class WineIdentity {
   }
 
   Map<String, dynamic> toJson() => {
-        'full_name': fullName,
-        'vintage': vintage,
-        'producer': producer,
-        'region': region,
-        'sub_region': subRegion,
-        'country': country,
-        'classification': classification,
-        'wine_type': wineType,
-        'grape_variety': grapeVariety,
-        'grapes': grapes,
-      };
+    'full_name': fullName,
+    'vintage': vintage,
+    'producer': producer,
+    'region': region,
+    'sub_region': subRegion,
+    'country': country,
+    'classification': classification,
+    'wine_type': wineType,
+    'grape_variety': grapeVariety,
+    'grapes': grapes,
+  };
 }
 
 class WineBenchmarks {
@@ -84,12 +85,12 @@ class WineBenchmarks {
   }
 
   Map<String, dynamic> toJson() => {
-        'global_top_percent': globalTopPercent,
-        'regional_top_percent': regionalTopPercent,
-        'average_price': averagePrice,
-        'price_currency': priceCurrency,
-        if (criticScore != null) 'critic_score': criticScore,
-      };
+    'global_top_percent': globalTopPercent,
+    'regional_top_percent': regionalTopPercent,
+    'average_price': averagePrice,
+    'price_currency': priceCurrency,
+    if (criticScore != null) 'critic_score': criticScore,
+  };
 }
 
 class TasteProfile {
@@ -122,22 +123,23 @@ class TasteProfile {
 
     return TasteProfile(
       lightBold: ((json['light_bold'] as num?)?.toInt() ?? 50).clamp(0, 100),
-      smoothTannic:
-          ((json['smooth_tannic'] as num?)?.toInt() ?? 50).clamp(0, 100),
+      smoothTannic: ((json['smooth_tannic'] as num?)?.toInt() ?? 50).clamp(
+        0,
+        100,
+      ),
       drySweet: ((json['dry_sweet'] as num?)?.toInt() ?? 50).clamp(0, 100),
-      softAcidic:
-          ((json['soft_acidic'] as num?)?.toInt() ?? 50).clamp(0, 100),
+      softAcidic: ((json['soft_acidic'] as num?)?.toInt() ?? 50).clamp(0, 100),
       aromaGroups: parsedAroma,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'light_bold': lightBold,
-        'smooth_tannic': smoothTannic,
-        'dry_sweet': drySweet,
-        'soft_acidic': softAcidic,
-        'aroma_groups': aromaGroups,
-      };
+    'light_bold': lightBold,
+    'smooth_tannic': smoothTannic,
+    'dry_sweet': drySweet,
+    'soft_acidic': softAcidic,
+    'aroma_groups': aromaGroups,
+  };
 }
 
 class ServingIntel {
@@ -165,19 +167,19 @@ class ServingIntel {
   }
 
   Map<String, dynamic> toJson() => {
-        'temperature_c': temperatureC,
-        'serving_tip': servingTip,
-        'decanting_recommendation': decantingRecommendation,
-        'glassware_recommendation': glasswareRecommendation,
-      };
+    'temperature_c': temperatureC,
+    'serving_tip': servingTip,
+    'decanting_recommendation': decantingRecommendation,
+    'glassware_recommendation': glasswareRecommendation,
+  };
 }
 
 class SocialScripts {
-  final String theHook;           // Point 1: Prestige fact
-  final String theGrape;          // Point 2: Grape character
-  final String theRegion;         // Point 3: Terroir impact
-  final String theVintage;        // Point 4: Vintage insight
-  final String theTaste;          // Point 5: Sensory trip
+  final String theHook; // Point 1: Prestige fact
+  final String theGrape; // Point 2: Grape character
+  final String theRegion; // Point 3: Terroir impact
+  final String theVintage; // Point 4: Vintage insight
+  final String theTaste; // Point 5: Sensory trip
 
   const SocialScripts({
     required this.theHook,
@@ -198,12 +200,12 @@ class SocialScripts {
   }
 
   Map<String, dynamic> toJson() => {
-        'the_hook': theHook,
-        'the_grape': theGrape,
-        'the_region': theRegion,
-        'the_vintage': theVintage,
-        'the_taste': theTaste,
-      };
+    'the_hook': theHook,
+    'the_grape': theGrape,
+    'the_region': theRegion,
+    'the_vintage': theVintage,
+    'the_taste': theTaste,
+  };
 }
 
 class DynamicPairing {
@@ -225,13 +227,17 @@ class DynamicPairing {
     return DynamicPairing(
       cuisine: (json['cuisine'] as String?) ?? '',
       pairingRationale: (json['pairing_rationale'] as String?) ?? '',
-      dishRecommendations: (json['dish_recommendations'] as List<dynamic>?)
+      dishRecommendations:
+          (json['dish_recommendations'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      pairingScore:
-          ((json['pairing_score'] as num?)?.toInt() ?? 70).clamp(0, 100),
-      avoidDishes: (json['avoid_dishes'] as List<dynamic>?)
+      pairingScore: ((json['pairing_score'] as num?)?.toInt() ?? 70).clamp(
+        0,
+        100,
+      ),
+      avoidDishes:
+          (json['avoid_dishes'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -239,12 +245,12 @@ class DynamicPairing {
   }
 
   Map<String, dynamic> toJson() => {
-        'cuisine': cuisine,
-        'pairing_rationale': pairingRationale,
-        'dish_recommendations': dishRecommendations,
-        'pairing_score': pairingScore,
-        'avoid_dishes': avoidDishes,
-      };
+    'cuisine': cuisine,
+    'pairing_rationale': pairingRationale,
+    'dish_recommendations': dishRecommendations,
+    'pairing_score': pairingScore,
+    'avoid_dishes': avoidDishes,
+  };
 }
 
 /// Region Style Information
@@ -268,10 +274,10 @@ class RegionStyle {
   }
 
   Map<String, dynamic> toJson() => {
-        'description': description,
-        'climate': climate,
-        'typical_profile': typicalProfile,
-      };
+    'description': description,
+    'climate': climate,
+    'typical_profile': typicalProfile,
+  };
 }
 
 /// Grape Education Information
@@ -298,11 +304,11 @@ class GrapeEducation {
   }
 
   Map<String, dynamic> toJson() => {
-        'variety': variety,
-        'percentage': percentage,
-        'description': description,
-        'characteristics': characteristics,
-      };
+    'variety': variety,
+    'percentage': percentage,
+    'description': description,
+    'characteristics': characteristics,
+  };
 }
 
 /// Flavor Profile (What People Talk About)
@@ -321,19 +327,23 @@ class FlavorProfile {
 
   factory FlavorProfile.fromJson(Map<String, dynamic> json) {
     return FlavorProfile(
-      primary: (json['primary'] as List<dynamic>?)
+      primary:
+          (json['primary'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      secondary: (json['secondary'] as List<dynamic>?)
+      secondary:
+          (json['secondary'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      tertiary: (json['tertiary'] as List<dynamic>?)
+      tertiary:
+          (json['tertiary'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      communityQuotes: (json['community_quotes'] as List<dynamic>?)
+      communityQuotes:
+          (json['community_quotes'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -341,11 +351,11 @@ class FlavorProfile {
   }
 
   Map<String, dynamic> toJson() => {
-        'primary': primary,
-        'secondary': secondary,
-        'tertiary': tertiary,
-        'community_quotes': communityQuotes,
-      };
+    'primary': primary,
+    'secondary': secondary,
+    'tertiary': tertiary,
+    'community_quotes': communityQuotes,
+  };
 }
 
 /// Community Review
@@ -372,11 +382,11 @@ class CommunityReview {
   }
 
   Map<String, dynamic> toJson() => {
-        'rating': rating,
-        'review_text': reviewText,
-        'source': source,
-        'review_count': reviewCount,
-      };
+    'rating': rating,
+    'review_text': reviewText,
+    'source': source,
+    'review_count': reviewCount,
+  };
 }
 
 class Wine {
@@ -452,27 +462,37 @@ class Wine {
       id: json['id']?.toString(),
       fingerprint: (json['fingerprint'] as String?) ?? '',
       identity: WineIdentity.fromJson(
-          (json['wine_identity'] as Map<String, dynamic>?) ?? {}),
+        (json['wine_identity'] as Map<String, dynamic>?) ?? {},
+      ),
       benchmarks: WineBenchmarks.fromJson(
-          (json['benchmarks'] as Map<String, dynamic>?) ?? {}),
+        (json['benchmarks'] as Map<String, dynamic>?) ?? {},
+      ),
       tasteProfile: TasteProfile.fromJson(
-          (json['taste_profile'] as Map<String, dynamic>?) ?? {}),
+        (json['taste_profile'] as Map<String, dynamic>?) ?? {},
+      ),
       servingIntel: ServingIntel.fromJson(
-          (json['serving_intel'] as Map<String, dynamic>?) ?? {}),
+        (json['serving_intel'] as Map<String, dynamic>?) ?? {},
+      ),
       socialScripts: SocialScripts.fromJson(
-          (json['social_scripts'] as Map<String, dynamic>?) ?? {}),
+        (json['social_scripts'] as Map<String, dynamic>?) ?? {},
+      ),
       pairings: parsedPairings,
       regionStyle: json['region_style'] != null
           ? RegionStyle.fromJson(json['region_style'] as Map<String, dynamic>)
           : null,
       grapeEducation: parsedGrapeEd,
       flavorProfile: json['flavor_profile'] != null
-          ? FlavorProfile.fromJson(json['flavor_profile'] as Map<String, dynamic>)
+          ? FlavorProfile.fromJson(
+              json['flavor_profile'] as Map<String, dynamic>,
+            )
           : null,
       communityReview: json['community_review'] != null
-          ? CommunityReview.fromJson(json['community_review'] as Map<String, dynamic>)
+          ? CommunityReview.fromJson(
+              json['community_review'] as Map<String, dynamic>,
+            )
           : null,
-      winemakerNotes: (json['winemaker_notes'] as String?) ??
+      winemakerNotes:
+          (json['winemaker_notes'] as String?) ??
           (json['winemaker_nose'] as String?) ??
           (json['nose'] as String?),
       createdAt: json['created_at'] != null
@@ -486,31 +506,51 @@ class Wine {
   }
 
   Map<String, dynamic> toJson() => {
-        if (id != null) 'id': id,
-        'fingerprint': fingerprint,
-        'wine_identity': identity.toJson(),
-        'benchmarks': benchmarks.toJson(),
-        'taste_profile': tasteProfile.toJson(),
-        'serving_intel': servingIntel.toJson(),
-        'social_scripts': socialScripts.toJson(),
-        'dynamic_pairing':
-            pairings.map((key, value) => MapEntry(key, value.toJson())),
-        if (regionStyle != null) 'region_style': regionStyle!.toJson(),
-        'grape_education': grapeEducation.map((e) => e.toJson()).toList(),
-        if (flavorProfile != null) 'flavor_profile': flavorProfile!.toJson(),
-        if (communityReview != null) 'community_review': communityReview!.toJson(),
-        if (winemakerNotes != null) 'winemaker_notes': winemakerNotes,
-        if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-        if (cachedAt != null) 'cached_at': cachedAt!.toIso8601String(),
-        if (scannedImageBase64 != null) 'scanned_image_base64': scannedImageBase64,
-      };
+    if (id != null) 'id': id,
+    'fingerprint': fingerprint,
+    'wine_identity': identity.toJson(),
+    'benchmarks': benchmarks.toJson(),
+    'taste_profile': tasteProfile.toJson(),
+    'serving_intel': servingIntel.toJson(),
+    'social_scripts': socialScripts.toJson(),
+    'dynamic_pairing': pairings.map(
+      (key, value) => MapEntry(key, value.toJson()),
+    ),
+    if (regionStyle != null) 'region_style': regionStyle!.toJson(),
+    'grape_education': grapeEducation.map((e) => e.toJson()).toList(),
+    if (flavorProfile != null) 'flavor_profile': flavorProfile!.toJson(),
+    if (communityReview != null) 'community_review': communityReview!.toJson(),
+    if (winemakerNotes != null) 'winemaker_notes': winemakerNotes,
+    if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+    if (cachedAt != null) 'cached_at': cachedAt!.toIso8601String(),
+    if (scannedImageBase64 != null) 'scanned_image_base64': scannedImageBase64,
+  };
 
   static String generateFingerprint(WineIdentity identity) {
-    // Normalize fields: trim whitespace and lowercase for consistent fingerprinting
-    final normalizedProducer = identity.producer.trim().toLowerCase();
-    final normalizedVintage = identity.vintage.trim().toLowerCase();
-    final normalizedRegion = identity.region.trim().toLowerCase();
-    final data = '$normalizedProducer|$normalizedVintage|$normalizedRegion';
+    String normalize(String value) =>
+        value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+    final normalizedGrapes =
+        identity.grapes
+            .map(normalize)
+            .where((grape) => grape.isNotEmpty)
+            .toList()
+          ..sort();
+
+    final parts = [
+      identity.fullName,
+      identity.producer,
+      identity.vintage,
+      identity.region,
+      identity.subRegion,
+      identity.country,
+      identity.classification,
+      identity.wineType,
+      identity.grapeVariety,
+      normalizedGrapes.join(','),
+    ].map(normalize);
+
+    final data = parts.join('|');
     return md5.convert(utf8.encode(data)).toString();
   }
 

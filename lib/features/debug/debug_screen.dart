@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../data/repositories/hive_database_helper.dart';
 import '../../data/models/wine_model.dart';
 import '../../data/models/user_model.dart';
@@ -16,10 +15,11 @@ class DebugScreen extends StatefulWidget {
   State<DebugScreen> createState() => _DebugScreenState();
 }
 
-class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStateMixin {
+class _DebugScreenState extends State<DebugScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoading = true;
-  
+
   // Data holders
   List<Wine> _wines = [];
   List<SearchHistory> _searchHistory = [];
@@ -43,32 +43,33 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
 
   Future<void> _loadAllData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // The app uses HiveDatabaseHelper as the primary database
       _dbType = kIsWeb ? 'Hive (Web/IndexedDB)' : 'Hive (Native)';
 
       // Load from Hive database (primary storage used by the app)
       final dbHelper = HiveDatabaseHelper();
-      
+
       // Get stats first for debugging
       _hiveStats = await dbHelper.getStats();
       debugPrint('DebugScreen: Hive stats = $_hiveStats');
-      
+
       _wines = await dbHelper.getAllWines();
       debugPrint('DebugScreen: Loaded ${_wines.length} wines');
-      
+
       _searchHistory = await dbHelper.getSearchHistory(limit: 100);
-      debugPrint('DebugScreen: Loaded ${_searchHistory.length} history entries');
-      
+      debugPrint(
+        'DebugScreen: Loaded ${_searchHistory.length} history entries',
+      );
+
       _user = await dbHelper.getUser();
       _vaultStats = await dbHelper.getVaultStats();
-      
     } catch (e, stackTrace) {
       debugPrint('Error loading debug data: $e');
       debugPrint('Stack trace: $stackTrace');
     }
-    
+
     setState(() => _isLoading = false);
   }
 
@@ -77,7 +78,9 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear All Data?'),
-        content: const Text('This will delete all wines, search history, and user settings. This cannot be undone.'),
+        content: const Text(
+          'This will delete all wines, search history, and user settings. This cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -98,15 +101,15 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
         await HiveDatabaseHelper().clearAll();
         await _loadAllData();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All data cleared')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('All data cleared')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error clearing data: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error clearing data: $e')));
         }
       }
     }
@@ -114,7 +117,7 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
 
   Future<void> _exportDatabaseDump() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final dbHelper = HiveDatabaseHelper();
       final wines = await dbHelper.getAllWines();
@@ -133,55 +136,47 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
           'totalWines': wines.length,
           'totalHistoryEntries': history.length,
           'hasUser': user != null,
-          'totalFaceEarned': vaultStats?.totalFaceEarned ?? 0.0,
-          'totalScannedValue': vaultStats?.totalScannedValue ?? 0.0,
+          'totalFaceEarned': vaultStats.totalFaceEarned,
+          'totalScannedValue': vaultStats.totalScannedValue,
         },
         'user': user?.toJson(),
         'wines': wines.map((w) => w.toJson()).toList(),
         'searchHistory': history.map((h) => h.toJson()).toList(),
-        'vaultStats': vaultStats != null ? {
+        'vaultStats': {
           'totalScans': vaultStats.totalScans,
           'totalFaceEarned': vaultStats.totalFaceEarned,
           'totalScannedValue': vaultStats.totalScannedValue,
           'mostScannedCuisine': vaultStats.mostScannedCuisine,
           'topConsumptionTier': vaultStats.topConsumptionTier,
-        } : null,
+        },
       };
 
       final jsonString = const JsonEncoder.withIndent('  ').convert(dump);
-      final fileName = 'wine_ai_dump_${DateTime.now().millisecondsSinceEpoch}.json';
+      final fileName =
+          'wine_ai_dump_${DateTime.now().millisecondsSinceEpoch}.json';
 
-      if (kIsWeb) {
-        // Web: Download not supported in APK build
-        // Use the web version for this feature
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Web download not available in mobile app')),
-          );
-        }
-      } else {
-        // Native: Save to documents directory
-        final directory = Directory.systemTemp;
-        final file = File('${directory.path}/$fileName');
-        await file.writeAsString(jsonString);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Database dump saved: ${file.path}')),
-          );
-        }
-      }
-      
+      await Share.shareXFiles(
+        [
+          XFile.fromData(
+            utf8.encode(jsonString),
+            mimeType: 'application/json',
+            name: fileName,
+          ),
+        ],
+        subject: 'Wine AI database dump',
+        text: 'Wine AI database export',
+        fileNameOverrides: [fileName],
+      );
+
       // Also print to console
       debugPrint('=== DATABASE DUMP ===');
       debugPrint(jsonString);
       debugPrint('=== END DUMP ===');
-      
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error exporting database: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error exporting database: $e')));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -190,7 +185,7 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
 
   Future<void> _printDatabaseToConsole() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final dbHelper = HiveDatabaseHelper();
       final wines = await dbHelper.getAllWines();
@@ -199,15 +194,27 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
 
       // Build formatted console output
       final buffer = StringBuffer();
-      buffer.writeln('\n╔══════════════════════════════════════════════════════════════╗');
-      buffer.writeln('║           WINE AI DATABASE DUMP                              ║');
+      buffer.writeln(
+        '\n╔══════════════════════════════════════════════════════════════╗',
+      );
+      buffer.writeln(
+        '║           WINE AI DATABASE DUMP                              ║',
+      );
       buffer.writeln('║           ${DateTime.now().toString().padRight(45)}║');
-      buffer.writeln('╚══════════════════════════════════════════════════════════════╝\n');
+      buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════╝\n',
+      );
 
       // User Section
-      buffer.writeln('┌─────────────────────────────────────────────────────────────┐');
-      buffer.writeln('│ USER PROFILE                                                │');
-      buffer.writeln('└─────────────────────────────────────────────────────────────┘');
+      buffer.writeln(
+        '┌─────────────────────────────────────────────────────────────┐',
+      );
+      buffer.writeln(
+        '│ USER PROFILE                                                │',
+      );
+      buffer.writeln(
+        '└─────────────────────────────────────────────────────────────┘',
+      );
       if (user != null) {
         buffer.writeln('  ID:               ${user.id}');
         buffer.writeln('  Occupation:       ${user.occupation}');
@@ -220,9 +227,15 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
       buffer.writeln('');
 
       // Wines Section
-      buffer.writeln('┌─────────────────────────────────────────────────────────────┐');
-      buffer.writeln('│ WINES (${wines.length} entries)${''.padRight(45 - wines.length.toString().length)}│');
-      buffer.writeln('└─────────────────────────────────────────────────────────────┘');
+      buffer.writeln(
+        '┌─────────────────────────────────────────────────────────────┐',
+      );
+      buffer.writeln(
+        '│ WINES (${wines.length} entries)${''.padRight(45 - wines.length.toString().length)}│',
+      );
+      buffer.writeln(
+        '└─────────────────────────────────────────────────────────────┘',
+      );
       if (wines.isEmpty) {
         buffer.writeln('  (No wines saved)');
       } else {
@@ -235,18 +248,30 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
           buffer.writeln('       Region:      ${wine.identity.region}');
           buffer.writeln('       Type:        ${wine.identity.wineType}');
           buffer.writeln('       Vintage:     ${wine.identity.vintage}');
-          buffer.writeln('       Grapes:      ${wine.identity.grapes.join(", ")}');
-          buffer.writeln('       Price:       \$${wine.benchmarks.averagePrice.toStringAsFixed(0)} ${wine.benchmarks.priceCurrency}');
-          buffer.writeln('       Global Rank: Top ${wine.benchmarks.globalTopPercent}%');
+          buffer.writeln(
+            '       Grapes:      ${wine.identity.grapes.join(", ")}',
+          );
+          buffer.writeln(
+            '       Price:       \$${wine.benchmarks.averagePrice.toStringAsFixed(0)} ${wine.benchmarks.priceCurrency}',
+          );
+          buffer.writeln(
+            '       Global Rank: Top ${wine.benchmarks.globalTopPercent}%',
+          );
           buffer.writeln('       Created:     ${wine.createdAt}');
         }
       }
       buffer.writeln('');
 
       // Search History Section
-      buffer.writeln('┌─────────────────────────────────────────────────────────────┐');
-      buffer.writeln('│ SEARCH HISTORY (${history.length} entries)${''.padRight(38 - history.length.toString().length)}│');
-      buffer.writeln('└─────────────────────────────────────────────────────────────┘');
+      buffer.writeln(
+        '┌─────────────────────────────────────────────────────────────┐',
+      );
+      buffer.writeln(
+        '│ SEARCH HISTORY (${history.length} entries)${''.padRight(38 - history.length.toString().length)}│',
+      );
+      buffer.writeln(
+        '└─────────────────────────────────────────────────────────────┘',
+      );
       if (history.isEmpty) {
         buffer.writeln('  (No search history)');
       } else {
@@ -256,29 +281,39 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
           buffer.writeln('       ID:       ${h.id}');
           buffer.writeln('       Cuisine:  ${h.cuisineContext ?? '-'}');
           buffer.writeln('       Budget:   \$${h.budgetContext ?? '-'}');
-          buffer.writeln('       Face:     ${h.faceEarned?.toStringAsFixed(1) ?? '0.0'}');
+          buffer.writeln(
+            '       Face:     ${h.faceEarned?.toStringAsFixed(1) ?? '0.0'}',
+          );
           buffer.writeln('       Scanned:  ${h.scannedAt}');
         }
       }
       buffer.writeln('');
 
-      buffer.writeln('╔══════════════════════════════════════════════════════════════╗');
-      buffer.writeln('║                    END OF DATABASE DUMP                      ║');
-      buffer.writeln('╚══════════════════════════════════════════════════════════════╝\n');
+      buffer.writeln(
+        '╔══════════════════════════════════════════════════════════════╗',
+      );
+      buffer.writeln(
+        '║                    END OF DATABASE DUMP                      ║',
+      );
+      buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════╝\n',
+      );
 
       final output = buffer.toString();
       debugPrint(output);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Database dump printed to console (DevTools)')),
+          const SnackBar(
+            content: Text('Database dump printed to console (DevTools)'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error printing database: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error printing database: $e')));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -362,14 +397,28 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
               _buildInfoRow('Search History', _searchHistory.length.toString()),
               _buildInfoRow('User Configured', _user != null ? 'Yes' : 'No'),
               const Divider(),
-              _buildInfoRow('Hive Wine Keys', (_hiveStats['winesKeys'] as List<dynamic>?)?.length.toString() ?? '0'),
-              _buildInfoRow('Hive History Keys', (_hiveStats['historyKeys'] as List<dynamic>?)?.length.toString() ?? '0'),
-              if ((_hiveStats['winesKeys'] as List<dynamic>?)?.isNotEmpty == true)
+              _buildInfoRow(
+                'Hive Wine Keys',
+                (_hiveStats['winesKeys'] as List<dynamic>?)?.length
+                        .toString() ??
+                    '0',
+              ),
+              _buildInfoRow(
+                'Hive History Keys',
+                (_hiveStats['historyKeys'] as List<dynamic>?)?.length
+                        .toString() ??
+                    '0',
+              ),
+              if ((_hiveStats['winesKeys'] as List<dynamic>?)?.isNotEmpty ==
+                  true)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     'Keys: ${(_hiveStats['winesKeys'] as List<dynamic>).take(5).join(', ')}${_hiveStats['winesKeys'].length > 5 ? '...' : ''}',
-                    style: const TextStyle(fontSize: 10, color: VivinoColors.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: VivinoColors.textSecondary,
+                    ),
                   ),
                 ),
             ],
@@ -378,20 +427,44 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
           _buildSectionCard(
             title: 'Vault Stats',
             children: [
-              _buildInfoRow('Total Scans', (_vaultStats?.totalScans ?? 0).toString()),
-              _buildInfoRow('Total Face Earned', (_vaultStats?.totalFaceEarned ?? 0).toStringAsFixed(1)),
-              _buildInfoRow('Total Value', '\$${(_vaultStats?.totalScannedValue ?? 0).toStringAsFixed(0)}'),
-              _buildInfoRow('Top Cuisine', _vaultStats?.mostScannedCuisine ?? '-'),
-              _buildInfoRow('Consumption Tier', _vaultStats?.topConsumptionTier ?? '-'),
+              _buildInfoRow(
+                'Total Scans',
+                (_vaultStats?.totalScans ?? 0).toString(),
+              ),
+              _buildInfoRow(
+                'Total Face Earned',
+                (_vaultStats?.totalFaceEarned ?? 0).toStringAsFixed(1),
+              ),
+              _buildInfoRow(
+                'Total Value',
+                '\$${(_vaultStats?.totalScannedValue ?? 0).toStringAsFixed(0)}',
+              ),
+              _buildInfoRow(
+                'Top Cuisine',
+                _vaultStats?.mostScannedCuisine ?? '-',
+              ),
+              _buildInfoRow(
+                'Consumption Tier',
+                _vaultStats?.topConsumptionTier ?? '-',
+              ),
             ],
           ),
           const SizedBox(height: 16),
           _buildSectionCard(
             title: 'Hive Cache Stats',
             children: [
-              _buildInfoRow('Cached Wines', (_hiveStats['cachedWines'] ?? 0).toString()),
-              _buildInfoRow('History Items', (_hiveStats['historyCount'] ?? 0).toString()),
-              _buildInfoRow('User Cached', (_hiveStats['hasUser'] ?? false) ? 'Yes' : 'No'),
+              _buildInfoRow(
+                'Cached Wines',
+                (_hiveStats['cachedWines'] ?? 0).toString(),
+              ),
+              _buildInfoRow(
+                'History Items',
+                (_hiveStats['historyCount'] ?? 0).toString(),
+              ),
+              _buildInfoRow(
+                'User Cached',
+                (_hiveStats['hasUser'] ?? false) ? 'Yes' : 'No',
+              ),
             ],
           ),
         ],
@@ -416,15 +489,22 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
         final wine = _wines[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ExpansionTile(
             title: Text(
-              wine.identity.fullName.isNotEmpty ? wine.identity.fullName : 'Unknown Wine',
+              wine.identity.fullName.isNotEmpty
+                  ? wine.identity.fullName
+                  : 'Unknown Wine',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               '${wine.identity.region} • ${wine.identity.wineType}',
-              style: const TextStyle(fontSize: 12, color: VivinoColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: VivinoColors.textSecondary,
+              ),
             ),
             children: [
               Padding(
@@ -437,11 +517,20 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
                     _buildInfoRow('Producer', wine.identity.producer),
                     _buildInfoRow('Vintage', wine.identity.vintage),
                     _buildInfoRow('Grapes', wine.identity.grapes.join(', ')),
-                    _buildInfoRow('Price', '\$${wine.benchmarks.averagePrice.toStringAsFixed(0)} ${wine.benchmarks.priceCurrency}'),
-                    _buildInfoRow('Global Rank', 'Top ${wine.benchmarks.globalTopPercent}%'),
+                    _buildInfoRow(
+                      'Price',
+                      '\$${wine.benchmarks.averagePrice.toStringAsFixed(0)} ${wine.benchmarks.priceCurrency}',
+                    ),
+                    _buildInfoRow(
+                      'Global Rank',
+                      'Top ${wine.benchmarks.globalTopPercent}%',
+                    ),
                     _buildInfoRow('Created', wine.createdAt?.toString() ?? '-'),
                     const SizedBox(height: 8),
-                    const Text('Full JSON:', style: TextStyle(fontWeight: FontWeight.w600)),
+                    const Text(
+                      'Full JSON:',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     const SizedBox(height: 4),
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -450,8 +539,13 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: SelectableText(
-                        const JsonEncoder.withIndent('  ').convert(wine.toJson()),
-                        style: const TextStyle(fontSize: 10, fontFamily: 'monospace'),
+                        const JsonEncoder.withIndent(
+                          '  ',
+                        ).convert(wine.toJson()),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
                       ),
                     ),
                   ],
@@ -481,7 +575,9 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
         final history = _searchHistory[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: VivinoColors.primary.withValues(alpha: 0.1),
@@ -503,7 +599,10 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
                 ),
                 Text(
                   'Face: ${history.faceEarned?.toStringAsFixed(1) ?? '0.0'} • ${history.scannedAt.toString().substring(0, 16)}',
-                  style: const TextStyle(fontSize: 11, color: VivinoColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: VivinoColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -569,14 +668,16 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
       'wines': _wines.map((w) => w.toJson()).toList(),
       'searchHistory': _searchHistory.map((h) => h.toJson()).toList(),
       'user': _user?.toJson(),
-      'vaultStats': _vaultStats != null ? {
-        'totalScans': _vaultStats!.totalScans,
-        'totalFaceEarned': _vaultStats!.totalFaceEarned,
-        'totalScannedValue': _vaultStats!.totalScannedValue,
-        'mostScannedCuisine': _vaultStats!.mostScannedCuisine,
-        'topConsumptionTier': _vaultStats!.topConsumptionTier,
-        'recentScansCount': _vaultStats!.recentScans.length,
-      } : null,
+      'vaultStats': _vaultStats != null
+          ? {
+              'totalScans': _vaultStats!.totalScans,
+              'totalFaceEarned': _vaultStats!.totalFaceEarned,
+              'totalScannedValue': _vaultStats!.totalScannedValue,
+              'mostScannedCuisine': _vaultStats!.mostScannedCuisine,
+              'topConsumptionTier': _vaultStats!.topConsumptionTier,
+              'recentScansCount': _vaultStats!.recentScans.length,
+            }
+          : null,
       'hiveStats': _hiveStats,
     };
 
@@ -591,7 +692,9 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
                 onPressed: () {
                   // Copy to clipboard would go here
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('JSON copied to clipboard (simulated)')),
+                    const SnackBar(
+                      content: Text('JSON copied to clipboard (simulated)'),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.copy, size: 16),
@@ -621,7 +724,10 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildSectionCard({required String title, required List<Widget> children}) {
+  Widget _buildSectionCard({
+    required String title,
+    required List<Widget> children,
+  }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -671,6 +777,4 @@ class _DebugScreenState extends State<DebugScreen> with SingleTickerProviderStat
       ),
     );
   }
-
-
 }

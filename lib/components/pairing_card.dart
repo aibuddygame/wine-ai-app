@@ -14,7 +14,7 @@ enum PairingCardState {
 }
 
 /// Card for selecting meal pairing input method
-class PairingCard extends StatelessWidget {
+class PairingCard extends StatefulWidget {
   final PairingCardState state;
   final Function(String) onQuickPickSelected;
   final VoidCallback onTypeDish;
@@ -26,7 +26,7 @@ class PairingCard extends StatelessWidget {
   final String locale;
 
   const PairingCard({
-    Key? key,
+    super.key,
     required this.state,
     required this.onQuickPickSelected,
     required this.onTypeDish,
@@ -36,13 +36,32 @@ class PairingCard extends StatelessWidget {
     required this.onCancel,
     this.errorMessage,
     this.locale = 'zh',
-  }) : super(key: key);
+  });
 
-  bool get _isZh => locale.startsWith('zh');
+  @override
+  State<PairingCard> createState() => _PairingCardState();
+}
+
+class _PairingCardState extends State<PairingCard> {
+  late final TextEditingController _dishController;
+
+  @override
+  void initState() {
+    super.initState();
+    _dishController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _dishController.dispose();
+    super.dispose();
+  }
+
+  bool get _isZh => widget.locale.startsWith('zh');
 
   @override
   Widget build(BuildContext context) {
-    switch (state) {
+    switch (widget.state) {
       case PairingCardState.typingDish:
         return _buildDishInputCard(context);
       case PairingCardState.loading:
@@ -54,15 +73,14 @@ class PairingCard extends StatelessWidget {
       case PairingCardState.scanningMenu:
       case PairingCardState.success:
       case PairingCardState.fallback:
-      default:
         return _buildMainCard(context);
     }
   }
 
   /// Main pairing card with quick picks
   Widget _buildMainCard(BuildContext context) {
-    final options = getQuickPickOptions(locale);
-    
+    final options = getQuickPickOptions(widget.locale);
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -75,22 +93,22 @@ class PairingCard extends StatelessWidget {
             // Title
             Text(
               _isZh ? '為今晚的餐點配對這瓶酒' : 'Match this bottle with tonight\'s meal',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             // Subtitle
             Text(
-              _isZh 
-                ? '快速獲得配對建議 — 點擊餐點類型、輸入菜名或掃描菜單' 
-                : 'Get pairing advice fast — tap a meal type, type a dish, or scan the menu.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              _isZh
+                  ? '快速獲得配對建議 — 點擊餐點類型、輸入菜名或掃描菜單'
+                  : 'Get pairing advice fast — tap a meal type, type a dish, or scan the menu.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 20),
-            
+
             // Quick pick buttons - Row 1
             Row(
               children: [
@@ -104,7 +122,7 @@ class PairingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            
+
             // Quick pick buttons - Row 2
             Row(
               children: [
@@ -118,13 +136,13 @@ class PairingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Secondary actions
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: onTypeDish,
+                    onPressed: widget.onTypeDish,
                     icon: const Icon(Icons.edit, size: 18),
                     label: Text(_isZh ? '輸入菜名' : 'Type dish'),
                     style: OutlinedButton.styleFrom(
@@ -135,7 +153,7 @@ class PairingCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: onScanMenu,
+                    onPressed: widget.onScanMenu,
                     icon: const Icon(Icons.camera_alt, size: 18),
                     label: Text(_isZh ? '掃描菜單' : 'Scan menu'),
                     style: OutlinedButton.styleFrom(
@@ -146,12 +164,12 @@ class PairingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            
+
             // Skip button
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: onSkip,
+                onPressed: widget.onSkip,
                 child: Text(_isZh ? '暫時跳過' : 'Skip for now'),
               ),
             ),
@@ -164,7 +182,7 @@ class PairingCard extends StatelessWidget {
   /// Quick pick button
   Widget _buildQuickPickButton(BuildContext context, QuickPickOption option) {
     return ElevatedButton(
-      onPressed: () => onQuickPickSelected(option.id),
+      onPressed: () => widget.onQuickPickSelected(option.id),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
         backgroundColor: Colors.grey[100],
@@ -187,8 +205,6 @@ class PairingCard extends StatelessWidget {
 
   /// Dish input card
   Widget _buildDishInputCard(BuildContext context) {
-    final controller = TextEditingController();
-    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -201,26 +217,26 @@ class PairingCard extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  onPressed: onCancel,
+                  onPressed: widget.onCancel,
                   icon: const Icon(Icons.arrow_back),
                 ),
                 Expanded(
                   child: Text(
                     _isZh ? '輸入你的菜名' : 'Type your dish',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: controller,
+              controller: _dishController,
               decoration: InputDecoration(
-                hintText: _isZh 
-                  ? '例如：清蒸石斑、和牛牛排、龍蝦意粉' 
-                  : 'e.g., steamed garoupa, wagyu steak, lobster pasta',
+                hintText: _isZh
+                    ? '例如：清蒸石斑、和牛牛排、龍蝦意粉'
+                    : 'e.g., steamed garoupa, wagyu steak, lobster pasta',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -232,8 +248,9 @@ class PairingCard extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  if (controller.text.isNotEmpty) {
-                    onDishSubmitted(controller.text);
+                  final dish = _dishController.text.trim();
+                  if (dish.isNotEmpty) {
+                    widget.onDishSubmitted(dish);
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -282,12 +299,15 @@ class PairingCard extends StatelessWidget {
             const Icon(Icons.error_outline, color: Colors.red, size: 48),
             const SizedBox(height: 16),
             Text(
-              errorMessage ?? (_isZh ? '暫時無法生成配對建議，請嘗試其他餐點類型' : 'Couldn\'t generate pairing advice right now. Please try another meal type.'),
+              widget.errorMessage ??
+                  (_isZh
+                      ? '暫時無法生成配對建議，請嘗試其他餐點類型'
+                      : 'Couldn\'t generate pairing advice right now. Please try another meal type.'),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: onCancel,
+              onPressed: widget.onCancel,
               child: Text(_isZh ? '重試' : 'Try again'),
             ),
           ],

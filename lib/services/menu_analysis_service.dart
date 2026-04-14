@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
@@ -40,7 +39,8 @@ class MenuPairingResult {
       pairings.where((p) => p.compatibilityScore < 50).toList();
 
   /// Check if this wine is suitable for the menu
-  bool get isSuitable => overallVerdict == 'excellent' || overallVerdict == 'good';
+  bool get isSuitable =>
+      overallVerdict == 'excellent' || overallVerdict == 'good';
 }
 
 /// Individual dish pairing result
@@ -66,7 +66,9 @@ class DishPairing {
     );
   }
 
-  bool get isRecommended => recommendation == 'strongly_recommended' || recommendation == 'recommended';
+  bool get isRecommended =>
+      recommendation == 'strongly_recommended' ||
+      recommendation == 'recommended';
   bool get shouldAvoid => recommendation == 'avoid';
 }
 
@@ -84,10 +86,11 @@ class MenuAnalysisService {
     if (apiKey.isEmpty) {
       throw Exception('API key not configured');
     }
-    
+
     final base64Image = base64Encode(menuImageBytes);
 
-    final prompt = '''You are a wine pairing expert. Analyze this restaurant menu against the provided wine profile.
+    final prompt =
+        '''You are a wine pairing expert. Analyze this restaurant menu against the provided wine profile.
 
 WINE PROFILE:
 $wineProfileJson
@@ -134,10 +137,10 @@ Rules:
               {'type': 'text', 'text': prompt},
               {
                 'type': 'image_url',
-                'image_url': {'url': 'data:image/jpeg;base64,$base64Image'}
-              }
-            ]
-          }
+                'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
+              },
+            ],
+          },
         ],
         'temperature': 0.3,
         'response_format': {'type': 'json_object'},
@@ -147,9 +150,9 @@ Rules:
     if (response.statusCode != 200) {
       debugPrint('Menu Analysis Error: Status ${response.statusCode}');
       debugPrint('Menu Analysis Error: Body ${response.body}');
-      debugPrint('Menu Analysis Error: API Key prefix = ${apiKey.substring(0, apiKey.length > 10 ? 10 : apiKey.length)}...');
-      debugPrint('Menu Analysis Error: API Key length = ${apiKey.length}');
-      throw Exception('Menu analysis failed: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Menu analysis failed: ${response.statusCode} - ${response.body}',
+      );
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
