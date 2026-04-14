@@ -284,102 +284,23 @@ class VivinoCuisineSelector extends StatelessWidget {
 class VivinoWineHero extends StatelessWidget {
   final String? imageUrl;
   final String? base64Image;
-  final double rating;
-  final int ratingCount;
-  final String? ratingContext;
 
   const VivinoWineHero({
     super.key,
     this.imageUrl,
     this.base64Image,
-    required this.rating,
-    required this.ratingCount,
-    this.ratingContext,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        // Wine bottle image
-        Container(
-          width: 200,
-          height: 300,
-          decoration: BoxDecoration(
-            color: VivinoColors.surfaceLight,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: _buildImage(),
-        ),
-        // Rating badge - positioned bottom right as in mockup
-        Positioned(
-          bottom: 20,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (ratingContext != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      ratingContext!,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF1976D2),
-                      ),
-                    ),
-                  ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.star,
-                      color: VivinoColors.star,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      rating.toStringAsFixed(1),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: VivinoColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$ratingCount ratings',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: VivinoColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+    return Container(
+      width: 200,
+      height: 300,
+      decoration: BoxDecoration(
+        color: VivinoColors.surfaceLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: _buildImage(),
     );
   }
 
@@ -482,6 +403,100 @@ class VivinoActionButtons extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Rating Row - Displayed in wine info list (not on image)
+class VivinoRatingRow extends StatelessWidget {
+  final double rating;
+  final int ratingCount;
+  final String? ratingContext;
+
+  const VivinoRatingRow({
+    super.key,
+    required this.rating,
+    required this.ratingCount,
+    this.ratingContext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: VivinoColors.border),
+          bottom: BorderSide(color: VivinoColors.border),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Star icon with rating
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: VivinoColors.star.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.star,
+              color: VivinoColors.star,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Rating number
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    rating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: VivinoColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (ratingContext != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE3F2FD),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        ratingContext!,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF1976D2),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$ratingCount ratings',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: VivinoColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          // Arrow indicating tappable
+          const Icon(
+            Icons.chevron_right,
+            color: VivinoColors.textTertiary,
+          ),
+        ],
+      ),
     );
   }
 }

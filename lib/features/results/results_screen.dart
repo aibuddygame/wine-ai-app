@@ -113,26 +113,35 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 1. HERO SECTION - Wine Image with Rating Badge
+                      // 1. HERO SECTION - Wine Image only
                       Center(
                         child: VivinoWineHero(
                           imageUrl: null,
                           base64Image: wine.scannedImageBase64,
-                          rating: wine.benchmarks.criticScore?.toDouble() ?? 4.2,
-                          ratingCount: wine.communityReview?.reviewCount ?? 2847,
-                          ratingContext: l10n.ratingContext,
                         ),
                       ),
 
                       const SizedBox(height: 24),
 
-                      // 2. ACTION BUTTONS - Rate & Actions
-                      VivinoActionButtons(
-                        rateLabel: l10n.rate,
-                        actionsLabel: l10n.actions,
-                        onRate: () {},
-                        onActions: () {},
+                      // 2. RATING ROW - In info list (not on image)
+                      VivinoRatingRow(
+                        rating: wine.benchmarks.criticScore?.toDouble() ?? 4.2,
+                        ratingCount: wine.communityReview?.reviewCount ?? 2847,
+                        ratingContext: l10n.ratingContext,
                       ),
+
+                      const SizedBox(height: 16),
+
+                      // 3. ACTION BUTTONS - Rate & Actions
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: VivinoActionButtons(
+                          rateLabel: l10n.rate,
+                          actionsLabel: l10n.actions,
+                          onRate: () {},
+                          onActions: () {},
+                        ),
+),
 
                       const SizedBox(height: 24),
 
