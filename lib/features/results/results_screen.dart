@@ -28,7 +28,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
 
     try {
-      final service = PairingService(apiKey: ''); // Uses mock data for MVP
+      // Get API key from WineProvider
+      final wineProvider = Provider.of<WineProvider>(context, listen: false);
+      final service = PairingService(apiKey: wineProvider.apiKey);
       final request = PairingRequest(
         wineId: wine.identity.fullName,
         wineName: wine.identity.fullName,
