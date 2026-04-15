@@ -141,13 +141,23 @@ class CachedWineService {
 
     // Step 1: Get wine analysis from AI (identity needed for fingerprint)
     debugPrint('CachedWineService: Getting wine identity from AI...');
-    final analyzedWine = await _kimiService.analyzeWineImage(
+    final quickResult = await _kimiService.analyzeWineImageStage1(
       imageBytes,
       occupation: occupation,
       budget: budget,
-      cuisine: cuisine,
     );
-    final identity = analyzedWine.identity;
+    // Create WineIdentity from quick result for fingerprinting
+    final identity = WineIdentity(
+      fullName: '${quickResult.winery} ${quickResult.wineName}',
+      vintage: quickResult.vintage,
+      producer: quickResult.winery,
+      region: quickResult.region,
+      subRegion: '',
+      country: quickResult.country,
+      wineType: quickResult.wineType,
+      grapeVariety: quickResult.grape,
+      grapes: [quickResult.grape],
+    );
     final fingerprint = Wine.generateFingerprint(identity);
 
     debugPrint('CachedWineService: Generated fingerprint: $fingerprint');
@@ -173,10 +183,17 @@ class CachedWineService {
         debugPrint(
           'CachedWineService: Wine incomplete. Missing: ${status.missingFields.join(', ')}',
         );
+        // Enrich the quick result to get full wine data
+        final enrichedWine = await _kimiService.enrichWineData(
+          quickResult,
+          occupation: occupation,
+          budget: budget,
+          cuisine: cuisine,
+        );
         final enhancedWine = await _enhanceWine(
           cachedWine: cachedWine,
           imageBytes: imageBytes,
-          analyzedWine: analyzedWine,
+          analyzedWine: enrichedWine,
           missingFields: status.missingFields,
         );
         return WineAnalysisResult(wine: enhancedWine, wasFromCache: false);
@@ -185,9 +202,16 @@ class CachedWineService {
 
     // Step 4: No cached wine or cache expired - generate all fields
     debugPrint('CachedWineService: Generating full wine content...');
+    // Enrich the quick result to get full wine data
+    final enrichedWine = await _kimiService.enrichWineData(
+      quickResult,
+      occupation: occupation,
+      budget: budget,
+      cuisine: cuisine,
+    );
     final newWine = await _generateFullWine(
       imageBytes: imageBytes,
-      analyzedWine: analyzedWine,
+      analyzedWine: enrichedWine,
       fingerprint: fingerprint,
     );
     return WineAnalysisResult(wine: newWine, wasFromCache: false);
